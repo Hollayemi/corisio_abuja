@@ -1,0 +1,160 @@
+import type { AdminOrderPeriod, AdminOrderStat } from "./adminOrders";
+
+/**
+ * Admin Customers: the staff-side customer list (stats + table) and the
+ * single-customer page (summary cards, order history, membership, personal
+ * info, activity, Suspend / Reactivate).
+ *
+ * The order history on the detail page reuses AdminOrderSummary and
+ * useListAdminOrdersQuery({ customerId }), see adminOrders.ts.
+ * Adjust field names here to match the NestJS DTOs.
+ */
+
+/**
+ * active    -> can sign in and order
+ * inactive  -> hasn't ordered for a while (set by the backend, shown "In-Active")
+ * suspended -> blocked by staff via "Suspend Account"
+ */
+export type AdminCustomerStatus = "active" | "inactive" | "suspended";
+
+/** Statuses staff can set (inactive is worked out by the backend, never set by hand). */
+export type AdminCustomerSettableStatus = Exclude<AdminCustomerStatus, "inactive">;
+
+/** Same "This Month" select as the Orders page. */
+export type AdminCustomerPeriod = AdminOrderPeriod;
+
+/** Same shape as the order stats: value plus an optional % or count change. */
+export type AdminCustomerStat = AdminOrderStat;
+
+/* ------------------------------------------------------------------ */
+/* List                                                                */
+/* ------------------------------------------------------------------ */
+
+/** A row in the Customers table. */
+export type AdminCustomerSummary = {
+  id: string;
+  fullName: string;
+  /** Profile photo. When missing the table shows initials ("CO"). */
+  avatar?: string | null;
+  email: string;
+  phone: string;
+  /** Number of orders placed. */
+  ordersCount: number;
+  /** NGN. */
+  totalSpent: number;
+  /** Plan name for the Membership column ("Gold", "Family"), null shows "—". */
+  membership: string | null;
+  /** ISO, null if the customer has never ordered. */
+  lastOrderAt: string | null;
+  status: AdminCustomerStatus;
+};
+
+export type ListAdminCustomersParams = {
+  /** Matches name, email and phone. */
+  search?: string;
+  status?: AdminCustomerStatus;
+  /** Only members (true) or only non-members (false). Omit for everyone. */
+  isMember?: boolean;
+  period?: AdminCustomerPeriod;
+  page?: number;
+  perPage?: number;
+};
+
+/* ------------------------------------------------------------------ */
+/* Stats                                                               */
+/* ------------------------------------------------------------------ */
+
+export type GetAdminCustomerStatsParams = {
+  period?: AdminCustomerPeriod;
+};
+
+/** The four numbers at the top of the Customers page. */
+export type AdminCustomerStats = {
+  totalCustomers: AdminCustomerStat;
+  newCustomers: AdminCustomerStat;
+  activeCustomers: AdminCustomerStat;
+  members: AdminCustomerStat;
+};
+
+/* ------------------------------------------------------------------ */
+/* Detail                                                              */
+/* ------------------------------------------------------------------ */
+
+export type AdminCustomerAddress = {
+  id: string;
+  /** One line, e.g. "1 Ola Akadiri Street, Alagbaka Quarters, Akure, Ondo State." */
+  address: string;
+  isDefault: boolean;
+};
+
+export type AdminMembershipStatus = "active" | "paused" | "cancelled" | "expired";
+
+/** The Membership card on the customer page. */
+export type AdminCustomerMembership = {
+  id: string;
+  /** "Gold Membership" */
+  planName: string;
+  /** NGN per billing interval, shown as "₦50,000 / month". */
+  amount: number;
+  interval: "week" | "month" | "year";
+  status: AdminMembershipStatus;
+  /** ISO. */
+  startedAt: string;
+  /** ISO, null when it won't renew (cancelled / expired). */
+  nextBillingAt: string | null;
+  /** ISO, null when nothing is scheduled. */
+  nextDeliveryAt: string | null;
+  /** "Weekly", "Fortnightly", "Monthly" as the backend words it. */
+  deliveryFrequency: string;
+};
+
+export type AdminCustomerActivityType =
+  | "order_placed"
+  | "order_delivered"
+  | "order_cancelled"
+  | "points_redeemed"
+  | "points_earned"
+  | "membership_subscribed"
+  | "membership_cancelled"
+  | "address_added"
+  | "other";
+
+/** One line of the Activity feed. */
+export type AdminCustomerActivity = {
+  id: string;
+  type: AdminCustomerActivityType;
+  /** Ready to show: "Placed order #LX-10481 — ₦32,400". */
+  title: string;
+  /** ISO. */
+  occurredAt: string;
+};
+
+export type AdminCustomerDetail = {
+  id: string;
+  fullName: string;
+  avatar?: string | null;
+  email: string;
+  phone: string;
+  status: AdminCustomerStatus;
+  /** NGN. */
+  totalSpent: number;
+  totalOrders: number;
+  loyaltyPoints: number;
+  /** ISO. The "Customer Since" card. */
+  customerSince: string;
+  addresses: AdminCustomerAddress[];
+  /** null when the customer has no membership (the Membership section is hidden). */
+  membership: AdminCustomerMembership | null;
+  /** Newest first. */
+  activity: AdminCustomerActivity[];
+};
+
+/* ------------------------------------------------------------------ */
+/* Actions                                                             */
+/* ------------------------------------------------------------------ */
+
+/** "Suspend Account" / "Reactivate Account". */
+export type UpdateAdminCustomerStatusRequest = {
+  id: string;
+  status: AdminCustomerSettableStatus;
+};
