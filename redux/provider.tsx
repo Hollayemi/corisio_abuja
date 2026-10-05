@@ -1,20 +1,26 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Provider } from "react-redux";
-import { useAppDispatch, useAppSelector, useAppStore } from "./hooks";
+import { useAuth } from "@/lib/auth/hooks";
+import { useAppDispatch, useAppStore } from "./hooks";
 import baseApi from "./slices/baseApi";
 import { cartApi, useGetServerCartQuery, useSyncCartMutation } from "./slices/cartApi";
 import { hydrateCart, mergeServerCart, type PersistedCart } from "./slices/cartSlice";
-import { sessionChanged } from "./slices/sessionSlice";
 import { makeStore, type AppStore } from "./store";
-import type { CartItem, PlaceOrderItem } from "./types";
+import type {
+  CartItem,
+  PlaceOrderItem,
+  ServerStoreCart,
+  StoreCartSettings,
+} from "./types";
 
 /** How long the cart has to sit still before a signed-in change is saved. */
 const SYNC_DEBOUNCE_MS = 1500;
 
-const CART_STORAGE_KEY = "luxol:cart:v2";
+// v3: items carry their store and checkout choices are per store. Carts saved
+// by older versions have no store on their items, so they are not carried over.
+const CART_STORAGE_KEY = "corisio:cart:v3";
 
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
@@ -25,6 +31,9 @@ function isItem(v: unknown): v is CartItem {
   return (
     typeof i.key === "string" &&
     typeof i.id === "string" &&
+    typeof i.storeId === "string" &&
+    i.storeId.length > 0 &&
+    typeof i.storeName === "string" &&
     typeof i.slug === "string" &&
     typeof i.name === "string" &&
     typeof i.image === "string" &&
@@ -34,23 +43,45 @@ function isItem(v: unknown): v is CartItem {
   );
 }
 
-function parseCart(raw: string | null): PersistedCart | null {
-  if (!raw) return null;
-  try {
-    const data = JSON.parse(raw) as Record<string, unknown>;
-    const promo = data.promo as Record<string, unknown> | null | undefined;
+function parseStores(raw: unknown): Record<string, StoreCartSettings> {
+  const stores: Record<string, StoreCartSettings> = {};
+  if (!raw || typeof raw !== "object") return stores;
 
-    return {
-      items: Array.isArray(data.items) ? data.items.filter(isItem) : [],
-      addressId: str(data.address),
-      phone: str(data.phone),
-      deliveryMethod: str(data.deliveryMethod),
+  for (const [storeId, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!value || typeof value !== "object") continue;
+    const v = value as Record<string, unknown>;
+    const promo = v.promo as Record<string, unknown> | null | undefined;
+
+    stores[storeId] = {
+      deliveryMethod: str(v.deliveryMethod),
       promo:
         promo &&
         typeof promo.code === "string" &&
         typeof promo.percentOff === "number"
           ? { code: promo.code, percentOff: promo.percentOff }
           : null,
+    };
+  }
+  return stores;
+}
+
+function parseCart(raw: string | null): PersistedCart | null {
+  if (!raw) return null;
+  try {
+    const data = JSON.parse(raw) as Record<string, unknown>;
+    const items = Array.isArray(data.items) ? data.items.filter(isItem) : [];
+
+    // Only keep checkout choices for stores that still have items
+    const stores = parseStores(data.stores);
+    for (const storeId of Object.keys(stores)) {
+      if (!items.some((i) => i.storeId === storeId)) delete stores[storeId];
+    }
+
+    return {
+      items,
+      stores,
+      addressId: str(data.addressId),
+      phone: str(data.phone),
     };
   } catch {
     return null;
@@ -78,10 +109,9 @@ function CartPersistence() {
 
       const persisted: PersistedCart = {
         items: cart.items,
+        stores: cart.stores,
         addressId: cart.addressId,
         phone: cart.phone,
-        deliveryMethod: cart.deliveryMethod,
-        promo: cart.promo,
       };
       const json = JSON.stringify(persisted);
       if (json === last) return;
@@ -111,16 +141,25 @@ function CartPersistence() {
 }
 
 
-function SessionSync() {
-  const { data, status } = useSession();
+/** The cart as the server wants it: SyncCartDto-shaped, one entry per store. */
+function groupForServer(items: CartItem[]) {
+  const byStore = new Map<string, PlaceOrderItem[]>();
+
+  for (const i of items) {
+    const list = byStore.get(i.storeId) ?? [];
+    list.push({ productId: i.id, quantity: i.quantity, variant: i.variant });
+    byStore.set(i.storeId, list);
+  }
+  return [...byStore].map(([storeId, items]) => ({ storeId, items }));
+}
+
+function AuthSync() {
+  const { status } = useAuth();
   const dispatch = useAppDispatch();
   const store = useAppStore();
-  const accessToken = data?.accessToken ?? null;
   const wasAuthenticated = useRef(false);
 
   useEffect(() => {
-    dispatch(sessionChanged({ status, accessToken }));
-
     if (status === "unauthenticated") {
       // Signed out: drop anything cached from the previous user
       dispatch(baseApi.util.resetApiState());
@@ -136,23 +175,26 @@ function SessionSync() {
       wasAuthenticated.current = true;
 
       const { cart } = store.getState();
-      if (cart.items.length > 0) {
-        const items: PlaceOrderItem[] = cart.items.map((i) => ({
-          productId: i.id,
-          quantity: i.quantity,
-          variant: i.variant,
-        }));
+      const stores = groupForServer(cart.items);
 
-        dispatch(cartApi.endpoints.mergeCart.initiate({ items }))
-          .unwrap()
-          .then((res) => dispatch(mergeServerCart(res.data.items)))
-          .catch(() => {
-            // Best-effort — the local cart already has everything it needs
-            // to keep working even if the merge call fails.
-          });
+      if (stores.length > 0) {
+        // One merge call per store (the endpoint takes a single storeId)
+        Promise.all(
+          stores.map((s) =>
+            dispatch(cartApi.endpoints.mergeCart.initiate(s))
+              .unwrap()
+              .then((res) => res.data)
+              // Best-effort — the local cart already has everything it needs
+              // to keep working even if one store's merge call fails.
+              .catch(() => null),
+          ),
+        ).then((results) => {
+          const merged = results.filter((r): r is ServerStoreCart => !!r);
+          if (merged.length > 0) dispatch(mergeServerCart(merged));
+        });
       }
     }
-  }, [dispatch, status, accessToken, store]);
+  }, [dispatch, status, store]);
 
   return null;
 }
@@ -160,15 +202,15 @@ function SessionSync() {
 /**
  * Keeps the local cart topped up from the account's saved cart.
  *
- * Fetches GET /cart only while signed in (never for guests) and folds
- * whatever comes back into the local cart via mergeServerCart, which only
+ * Fetches GET /cart (one saved cart per store) only while signed in (never for
+ * guests) and folds whatever comes back into the local cart via mergeServerCart, which only
  * ever adds/raises quantities — it never removes something already in the
  * cart on this device. Runs once per sign-in (and again whenever "Cart" is
  * invalidated by a sync/merge/order), not on every render.
  */
 function ServerCartSync() {
   const dispatch = useAppDispatch();
-  const isAuthenticated = useAppSelector((s) => s.session.status === "authenticated");
+  const { isAuthenticated } = useAuth();
   const { data } = useGetServerCartQuery(undefined, { skip: !isAuthenticated });
   const lastMerged = useRef<string>("");
 
@@ -176,10 +218,10 @@ function ServerCartSync() {
     if (!data?.data) return;
     // Skip re-merging the exact same snapshot (RTK Query re-runs this
     // effect whenever the query result reference changes).
-    const stamp = data.data.updatedAt || JSON.stringify(data.data.items);
+    const stamp = JSON.stringify(data.data);
     if (stamp === lastMerged.current) return;
     lastMerged.current = stamp;
-    dispatch(mergeServerCart(data.data.items));
+    dispatch(mergeServerCart(data.data));
   }, [data, dispatch]);
 
   return null;
@@ -187,34 +229,46 @@ function ServerCartSync() {
 
 /**
  * Saves the cart to the account in the background — only while signed in,
- * only when there's actually something in the cart, and debounced so it
- * fires once after things settle rather than on every add/remove. This is
- * a convenience for cross-device continuity; checkout does its own
- * best-effort sync right before placing the order regardless.
+ * one PUT /cart per store whose items changed (SyncCartDto is per store), and
+ * debounced so it fires once after things settle rather than on every
+ * add/remove. This is a convenience for cross-device continuity; checkout does
+ * its own best-effort sync for the store being bought right before placing the
+ * order regardless.
  */
 function CartAutoSync() {
   const store = useAppStore();
-  const isAuthenticated = useAppSelector((s) => s.session.status === "authenticated");
+  const { isAuthenticated } = useAuth();
   const [syncCart] = useSyncCartMutation();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    let last = "";
+    // What each store's saved cart looked like the last time we sent it
+    const sent = new Map<string, string>();
+
     const flush = () => {
       const { cart } = store.getState();
-      if (!cart.hydrated || cart.items.length === 0) return;
+      if (!cart.hydrated) return;
 
-      const items: PlaceOrderItem[] = cart.items.map((i) => ({
-        productId: i.id,
-        quantity: i.quantity,
-        variant: i.variant,
-      }));
-      const json = JSON.stringify(items);
-      if (json === last) return;
-      last = json;
-      syncCart({ items }).catch(() => {});
+      const stores = groupForServer(cart.items);
+      const current = new Set(stores.map((s) => s.storeId));
+
+      // One PUT per store whose items changed
+      for (const { storeId, items } of stores) {
+        const json = JSON.stringify(items);
+        if (sent.get(storeId) === json) continue;
+        sent.set(storeId, json);
+        syncCart({ storeId, items }).unwrap().catch(() => {});
+      }
+
+      // A store we synced earlier that is now empty (removed, or its order was
+      // placed): clear its saved cart too, so it doesn't come back later.
+      for (const storeId of [...sent.keys()]) {
+        if (current.has(storeId)) continue;
+        sent.delete(storeId);
+        syncCart({ storeId, items: [] }).unwrap().catch(() => {});
+      }
     };
 
     const unsubscribe = store.subscribe(() => {
@@ -232,14 +286,14 @@ function CartAutoSync() {
 }
 
 
-/** Must sit inside next-auth's <SessionProvider>. */
+/** Wraps the app in the Redux store; AuthSync below keeps the cart in step with sign in / out. */
 export default function ReduxProvider({ children }: { children: ReactNode }) {
   const [store] = useState<AppStore>(makeStore);
 
   return (
     <Provider store={store}>
       <CartPersistence />
-      <SessionSync />
+      <AuthSync />
       <ServerCartSync />
       <CartAutoSync />
       {children}

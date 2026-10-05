@@ -5,7 +5,7 @@ import type {
   OrderResponse,
   PlaceOrderRequest,
   PromoInfo,
-  ServerCart,
+  ServerStoreCart,
   SyncCartRequest,
   ValidateCartRequest,
   ValidateCartResponse,
@@ -18,36 +18,38 @@ import { DeliveryMethod } from "../types/checkout";
  * Cart.
  *
  *  Query
- *  ── GET  /delivery-methods    getDeliveryMethods (replaces the static
+ *  ── GET  /delivery-methods    getDeliveryMethods (?storeId=…; replaces the static
  *                               DELIVERY_METHODS fallback once this is live)
- *  ── GET  /cart                getServerCart      (signed-in user's saved cart)
+ *  ── GET  /cart                getServerCart      (signed-in user's saved carts, one per store)
  *
- *  Sync
- *  ── PUT  /cart                syncCart   (save the local cart to the account —
- *                               call on meaningful changes, and always before checkout)
- *  ── POST /cart/merge          mergeCart  (fold a guest cart in right after login)
+ *  Sync (all per store: the body carries a storeId)
+ *  ── PUT  /cart                syncCart   (save ONE store's cart to the account —
+ *                               on meaningful changes, and always before checkout)
+ *  ── POST /cart/merge          mergeCart  (fold a guest cart for one store in after login)
  *
- *  Checkout
+ *  Checkout (one store at a time)
  *  ── POST /promo-codes/validate  validatePromo
  *  ── POST /cart/validate         validateCart (re-check stock & current prices
  *                                 immediately before placing the order)
- *  ── POST /orders                placeOrder
+ *  ── POST /orders                placeOrder   (one order per store)
  *
- * The cart itself (add/remove/quantity, address/phone/promo fields) stays
- * client-side in redux/slices/cartSlice.ts — only these boundary actions
- * touch the network.
+ * The cart itself (add/remove/quantity, address/phone, per-store delivery
+ * method and promo) stays client-side in redux/slices/cartSlice.ts — only
+ * these boundary actions touch the network.
  */
 export const cartApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getDeliveryMethods: builder.query<ApiSuccess<DeliveryMethod[]>, void>({
-      query: () => ({
+    /** Pass the storeId to get the methods that store offers. */
+    getDeliveryMethods: builder.query<ApiSuccess<DeliveryMethod[]>, string | void>({
+      query: (storeId) => ({
         url: API_ROUTES.cart.deliveryMethods,
         method: "GET",
+        params: storeId ? { storeId } : undefined,
       }),
       providesTags: ["DeliveryMethods"],
     }),
 
-    getServerCart: builder.query<ApiSuccess<ServerCart>, void>({
+    getServerCart: builder.query<ApiSuccess<ServerStoreCart[]>, void>({
       query: () => ({
         url: API_ROUTES.cart.get,
         method: "GET",
@@ -55,7 +57,7 @@ export const cartApi = baseApi.injectEndpoints({
       providesTags: ["Cart"],
     }),
 
-    syncCart: builder.mutation<ApiSuccess<ServerCart>, SyncCartRequest>({
+    syncCart: builder.mutation<ApiSuccess<ServerStoreCart>, SyncCartRequest>({
       query: (body) => ({
         url: API_ROUTES.cart.sync,
         method: "PUT",
@@ -64,7 +66,7 @@ export const cartApi = baseApi.injectEndpoints({
       invalidatesTags: ["Cart"],
     }),
 
-    mergeCart: builder.mutation<ApiSuccess<ServerCart>, MergeCartRequest>({
+    mergeCart: builder.mutation<ApiSuccess<ServerStoreCart>, MergeCartRequest>({
       query: (body) => ({
         url: API_ROUTES.cart.merge,
         method: "POST",

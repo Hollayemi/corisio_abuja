@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import AccountButton, { HeaderIconLink } from "@/app/components/ui/AccountButton";
 import useOpenAuth from "@/app/components/auth/useOpenAuth";
 import useOpenCart from "@/app/components/cart/useOpenCart";
+import { useAuth } from "@/lib/auth/hooks";
 import { useCartCount } from "@/redux/hooks";
 import {
   BagIcon,
@@ -143,7 +143,7 @@ export default function Header() {
   const cartCount = useCartCount();
   const openCart = useOpenCart();
   const openAuth = useOpenAuth();
-  const { status } = useSession();
+  const { status } = useAuth();
   const signedIn = status === "authenticated";
   const [open, setOpen] = useState(false);
   const closeMenu = () => setOpen(false);
@@ -234,7 +234,7 @@ export default function Header() {
                 width={130}
                 height={52}
                 priority
-                className="h-11 w-auto"
+                className="w-30 h-8 md:h-11 md:w-auto"
               />
             </Link>
 

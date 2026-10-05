@@ -11,9 +11,9 @@ import baseApi from "./baseApi";
 
 /** Endpoints for the admin Delivery & Schedule page. */
 export const ADMIN_DELIVERY_ROUTES = {
-  calendar: "/admin/deliveries/calendar",
-  list: "/admin/deliveries",
-  status: (id: string) => `/admin/deliveries/${id}/status`,
+  calendar: "/dashboard/deliveries/calendar",
+  list: "/dashboard/deliveries",
+  status: (id: string) => `/dashboard/deliveries/${id}/status`,
 } as const;
 
 /**
@@ -53,9 +53,9 @@ export const adminDeliveriesApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.items.map((d) => ({ type: "AdminDelivery" as const, id: d.id })),
-              { type: "AdminDelivery" as const, id: "LIST" },
-            ]
+            ...result.data.items.map((d) => ({ type: "AdminDelivery" as const, id: d.id })),
+            { type: "AdminDelivery" as const, id: "LIST" },
+          ]
           : [{ type: "AdminDelivery" as const, id: "LIST" }],
     }),
 

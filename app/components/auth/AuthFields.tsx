@@ -4,8 +4,10 @@ import {
   useId,
   useState,
   type InputHTMLAttributes,
+  type TextareaHTMLAttributes,
   type ReactNode,
 } from "react";
+import { SignupAccountType } from "@/redux/types";
 
 const inputClass =
   "h-[52px] w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-corisio-blue focus:outline-none focus:ring-2 focus:ring-corisio-blue/30";
@@ -102,6 +104,38 @@ export function TextField({ label, hint, ...props }: FieldProps & { type?: strin
         type="text"
         aria-describedby={hint ? hintId : undefined}
         className={`${inputClass} mt-2.5`}
+        {...props}
+      />
+      {hint && (
+        <p id={hintId} className="mt-2 text-xs text-neutral-500">
+          {hint}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function TextAreaField({
+  label,
+  hint,
+  ...props
+}: Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "className" | "id"> & {
+  label: string;
+  hint?: string;
+}) {
+  const id = useId();
+  const hintId = `${id}-hint`;
+
+  return (
+    <div>
+      <label htmlFor={id} className={labelClass}>
+        {label}
+      </label>
+      <textarea
+        id={id}
+        rows={4}
+        aria-describedby={hint ? hintId : undefined}
+        className={`${inputClass} mt-2.5 h-auto resize-y py-3`}
         {...props}
       />
       {hint && (
@@ -245,5 +279,68 @@ export function SwitchPrompt({
         {action}
       </button>
     </p>
+  );
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Account type                                                        */
+/* ------------------------------------------------------------------ */
+
+const ACCOUNT_TYPES: { value: SignupAccountType; title: string; text: string }[] = [
+  {
+    value: SignupAccountType.CUSTOMER,
+    title: "I want to shop",
+    text: "Discover stores and order from them",
+  },
+  {
+    value: SignupAccountType.STORE_OWNER,
+    title: "I own a store",
+    text: "List your store and sell on Corisio",
+  },
+];
+
+/** Customer / store owner choice for the register form (RegisterDto.accountType). */
+export function AccountTypePicker({
+  value,
+  onChange,
+}: {
+  value: SignupAccountType;
+  onChange: (value: SignupAccountType) => void;
+}) {
+  return (
+    <fieldset>
+      <legend className={labelClass}>I&rsquo;m signing up as</legend>
+      <div className="mt-2.5 grid grid-cols-2 gap-3">
+        {ACCOUNT_TYPES.map((type) => {
+          const selected = value === type.value;
+          return (
+            <label
+              key={type.value}
+              className={`cursor-pointer rounded-lg border p-3 text-left transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-corisio-blue ${
+                selected
+                  ? "border-corisio-blue bg-corisio-blue/5"
+                  : "border-neutral-200 hover:border-neutral-300"
+              }`}
+            >
+              <input
+                type="radio"
+                name="accountType"
+                value={type.value}
+                checked={selected}
+                onChange={() => onChange(type.value)}
+                className="sr-only"
+              />
+              <span className="block text-sm font-semibold text-neutral-900">
+                {type.title}
+              </span>
+              <span className="mt-1 block text-xs leading-snug text-neutral-600">
+                {type.text}
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }

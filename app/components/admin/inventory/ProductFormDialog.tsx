@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { notify } from "@/lib/notify";
 import { getErrorMessage } from "@/redux/config/errors";
-import { useCreateProductMutation, useListCategoriesQuery, useUpdateProductMutation } from "@/redux/slices/inventoryApi";
+import { useCreateProductMutation, useUpdateProductMutation } from "@/redux/slices/inventoryApi";
 import type { Product, ProductStatus, VariantOption } from "@/redux/types";
 import {
   ImageUploadField,
@@ -13,6 +13,7 @@ import {
   TextareaField,
 } from "./fields";
 import { ModalButton, ModalHeader } from "./ModalHeader";
+import { useGetCategoriesQuery } from "@/redux/slices/catalogApi";
 
 const VARIANT_OPTIONS = [
   { label: "Standalone product (no variants)", value: "NONE" },
@@ -30,7 +31,6 @@ const STATUS_OPTIONS: { label: string; value: ProductStatus }[] = [
   { label: "Inactive", value: "INACTIVE" },
 ];
 
-/** "New Product" / edit form (design image 3), opened from the Inventory page's "Add Product" button. */
 export function ProductFormDialog({
   product,
   close,
@@ -39,8 +39,8 @@ export function ProductFormDialog({
   product?: Product;
   close: () => void;
 }) {
-  const { data: categoriesData, isLoading: categoriesLoading } = useListCategoriesQuery();
-  const categories = categoriesData?.data.items ?? [];
+  const { data: categoriesData, isLoading: categoriesLoading } = useGetCategoriesQuery();
+  const categories = categoriesData?.data ?? [];
 
   const [createProduct, { isLoading: creating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: updating }] = useUpdateProductMutation();
@@ -164,7 +164,7 @@ export function ProductFormDialog({
               label="Category"
               value={categoryId}
               onChange={setCategoryId}
-              options={categories.map((c: any) => ({ label: c.name, value: c.id }))}
+              options={categories.map((c) => ({ label: c.name, value: c.id }))}
               placeholder={categoriesLoading ? "Loading categories..." : "Select the category"}
               disabled={categoriesLoading}
             />

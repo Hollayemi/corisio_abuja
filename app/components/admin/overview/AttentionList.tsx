@@ -13,10 +13,10 @@ const KIND_LABELS: Record<AdminAttentionKind, string> = {
 };
 
 const KIND_HREFS: Record<AdminAttentionKind, string> = {
-  SHOP: "/admin/orders",
-  MEAT_BOX: "/admin/orders",
-  FREEZER_PLANNER: "/admin/orders",
-  MEMBERSHIP: "/admin/membership",
+  SHOP: "/dashboard/orders",
+  MEAT_BOX: "/dashboard/orders",
+  FREEZER_PLANNER: "/dashboard/orders",
+  MEMBERSHIP: "/dashboard/membership",
 };
 
 const STATUS_LABELS: Record<AdminAttentionStatus, string> = {

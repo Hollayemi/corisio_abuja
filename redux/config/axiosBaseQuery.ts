@@ -1,5 +1,6 @@
 import axios, { type AxiosRequestConfig } from "axios";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
+import { clearToken, readToken } from "@/lib/auth/token";
 import { isApiFailure, isApiSuccess, toApiError } from "./errors";
 import type { ApiError, ApiSuccess } from "../types";
 
@@ -10,6 +11,32 @@ export const axiosInstance = axios.create({
   // JSON → application/json. FormData → multipart/form-data; boundary=...
 });
 
+// Every request (RTK Query and the React Query auth hooks) carries the signed-in
+// user's token, read from the auth cookie at send time.
+axiosInstance.interceptors.request.use((config) => {
+  const token = readToken();
+  if (token && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// A 401 on a request that carried a token means it expired or was revoked:
+// drop it, and the auth state flips to signed out everywhere.
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 401 &&
+      error.config?.headers?.Authorization
+    ) {
+      clearToken();
+    }
+    return Promise.reject(error);
+  },
+);
+
 export type AxiosBaseQueryArgs = {
   url: string;
   method?: AxiosRequestConfig["method"];
@@ -19,11 +46,7 @@ export type AxiosBaseQueryArgs = {
 };
 
 const axiosBaseQuery = (): BaseQueryFn<AxiosBaseQueryArgs, unknown, ApiError> =>
-  async ({ url, method = "GET", data, params, headers }, { getState, signal }) => {
-    const token = (
-      getState() as { session?: { accessToken?: string | null } }
-    ).session?.accessToken;
-
+  async ({ url, method = "GET", data, params, headers }, { signal }) => {
     try {
       const response = await axiosInstance.request({
         url,
@@ -31,10 +54,7 @@ const axiosBaseQuery = (): BaseQueryFn<AxiosBaseQueryArgs, unknown, ApiError> =>
         data,
         params,
         signal,
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          ...headers,
-        },
+        headers,
       });
 
       const body: unknown = response.data;

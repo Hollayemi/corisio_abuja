@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import AdminIcon from "@/app/components/admin/layout/AdminIcon";
+import { useRefreshUser } from "@/lib/auth/hooks";
 import { notify } from "@/lib/notify";
 import { getErrorMessage } from "@/redux/config/errors";
 import {
@@ -64,7 +64,7 @@ export function ProfileTab() {
 
 function ProfileForm({ profile, roles }: { profile: AdminProfile; roles: AdminSettingsOption[] }) {
   const router = useRouter();
-  const { update: updateSession } = useSession();
+  const refreshUser = useRefreshUser();
   const [updateProfile, { isLoading: saving }] = useUpdateAdminProfileMutation();
 
   const ids = { first: useId(), last: useId(), email: useId(), role: useId(), bio: useId() };
@@ -141,10 +141,7 @@ function ProfileForm({ profile, roles }: { profile: AdminProfile; roles: AdminSe
       notify.success("Profile updated", { id: "admin-profile" });
 
       // Refresh the name and photo in the top bar
-      await updateSession({
-        name: next.name,
-        image: next.avatar ?? null,
-      });
+      await refreshUser();
       router.refresh();
     } catch (err) {
       setError(getErrorMessage(err));

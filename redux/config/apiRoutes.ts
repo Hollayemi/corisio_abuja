@@ -8,6 +8,11 @@ export const API_ROUTES = {
     register: "/auth/register",
     google: "/auth/google",
     forgotPassword: "/auth/forgot-password",
+    resetPassword: "/auth/reset-password",
+  },
+  stores: {
+    /** CreateStoreDto: the store setup step after a STORE_OWNER registers */
+    create: "/auth/stores",
   },
   admin: {
     verifyInvite: "/admin/invitations/verify",

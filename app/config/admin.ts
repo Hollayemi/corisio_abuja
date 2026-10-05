@@ -16,15 +16,15 @@ export type AdminNavItem = {
  */
 export const adminNav = {
   core: [
-    { label: "Overview", href: "/admin", icon: "overview" },
+    { label: "Overview", href: "/dashboard", icon: "overview" },
     // TODO: feed the badge from the real number of orders needing attention
-    { label: "Orders", href: "/admin/orders", icon: "orders", badge: 0 },
-    { label: "Customers", href: "/admin/customers", icon: "customers" },
-    { label: "Inventory", href: "/admin/inventory", icon: "inventory" },
-    { label: "Promotions", href: "/admin/promotions", icon: "promotions" },
-    { label: "Delivery & Schedule", href: "/admin/delivery", icon: "delivery" },
-    { label: "Analytics", href: "/admin/analytics", icon: "analytics" },
-    { label: "Membership", href: "/admin/membership", icon: "membership" },
+    { label: "Orders", href: "/dashboard/orders", icon: "orders", badge: 0 },
+    { label: "Customers", href: "/dashboard/customers", icon: "customers" },
+    { label: "Inventory", href: "/dashboard/inventory", icon: "inventory" },
+    { label: "Promotions", href: "/dashboard/promotions", icon: "promotions" },
+    { label: "Delivery & Schedule", href: "/dashboard/delivery", icon: "delivery" },
+    { label: "Analytics", href: "/dashboard/analytics", icon: "analytics" },
+    { label: "Membership", href: "/dashboard/membership", icon: "membership" },
   ],
   features: [
     { label: "Meat Box", href: "/meat-box", icon: "meatBox", external: true },
@@ -35,15 +35,15 @@ export const adminNav = {
       external: true,
     },
   ],
-  settings: { label: "Settings", href: "/admin/settings", icon: "settings" },
+  settings: { label: "Settings", href: "/dashboard/settings", icon: "settings" },
 } satisfies {
   core: AdminNavItem[];
   features: AdminNavItem[];
   settings: AdminNavItem;
 };
 
-/** "/admin" only matches itself; other items also match their sub pages. */
+/** "/dashboard" only matches itself; other items also match their sub pages. */
 export function isNavActive(pathname: string, href: string) {
-  if (href === "/admin") return pathname === "/admin";
+  if (href === "/dashboard") return pathname === "/dashboard";
   return pathname === href || pathname.startsWith(`${href}/`);
 }

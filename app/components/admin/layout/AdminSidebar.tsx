@@ -8,11 +8,7 @@ import { siteConfig } from "@/app/config/site";
 import AdminIcon from "./AdminIcon";
 import useAdminSignOut from "./useAdminSignOut";
 
-/*
- * Collapsing only applies from the lg breakpoint up (the sidebar is a
- * slide-in drawer below it). The aside carries data-collapsed and the
- * "lg:group-data-[collapsed=true]/side:" classes react to it.
- */
+
 const HIDE_WHEN_COLLAPSED = "lg:group-data-[collapsed=true]/side:hidden";
 
 function NavLink({
@@ -26,7 +22,7 @@ function NavLink({
 }) {
   const className = `flex h-[42px] items-center gap-3 rounded-xl px-5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue lg:group-data-[collapsed=true]/side:justify-center lg:group-data-[collapsed=true]/side:px-0 ${
     active
-      ? "bg-[#ebf4e9] font-medium text-corisio-blue"
+      ? "bg-corisio-blue font-medium text-white"
       : "text-neutral-700 hover:bg-neutral-50"
   }`;
 

@@ -17,6 +17,7 @@ const baseApi = createApi({
     "Cart",
     "DeliveryMethods",
     "User",
+    "Auth",
     "Addresses",
     "Promotion",
     "PromotionStats",

@@ -3,10 +3,12 @@ import { useDispatch, useSelector, useStore } from "react-redux";
 import {
   addItem,
   clearCart,
+  clearStore,
   makeSelectIsInCart,
   removeItem,
   selectCart,
   selectCartCount,
+  selectCartGroups,
   selectItemsTotal,
   setAddress,
   setDeliveryMethod,
@@ -35,12 +37,15 @@ export function useIsInCart(id: string, variant?: string) {
   return useAppSelector(useMemo(() => makeSelectIsInCart(id, variant), [id, variant]));
 }
 
-/** The cart state, derived totals and ready-to-call actions. */
+/**
+ * The cart state, derived totals and ready-to-call actions.
+ * `groups` is the cart split by store; delivery method and promo are per store.
+ */
 export function useCart() {
   const cart = useAppSelector(selectCart);
+  const groups = useAppSelector(selectCartGroups);
   const itemsTotal = useAppSelector(selectItemsTotal);
   const dispatch = useAppDispatch();
-
   const actions = useMemo(
     () => ({
       addItem: (item: Omit<CartItem, "key" | "quantity">, quantity = 1) =>
@@ -48,14 +53,19 @@ export function useCart() {
       removeItem: (key: string) => dispatch(removeItem(key)),
       setQuantity: (key: string, quantity: number) =>
         dispatch(setQuantity({ key, quantity })),
+      /** Empties one store's cart (after its order is placed) */
+      clearStore: (storeId: string) => dispatch(clearStore(storeId)),
+      /** Empties every store's cart */
       clear: () => dispatch(clearCart()),
       setAddress: (addressId: string) => dispatch(setAddress(addressId)),
       setPhone: (phone: string) => dispatch(setPhone(phone)),
-      setDeliveryMethod: (id: string) => dispatch(setDeliveryMethod(id)),
-      setPromo: (promo: PromoInfo | null) => dispatch(setPromo(promo)),
+      setDeliveryMethod: (storeId: string, method: string) =>
+        dispatch(setDeliveryMethod({ storeId, method })),
+      setPromo: (storeId: string, promo: PromoInfo | null) =>
+        dispatch(setPromo({ storeId, promo })),
     }),
     [dispatch],
   );
 
-  return { ...cart, count: cart.items.length, itemsTotal, ...actions };
+  return { ...cart, groups, count: cart.items.length, itemsTotal, ...actions };
 }

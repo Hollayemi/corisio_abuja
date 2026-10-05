@@ -1,4 +1,12 @@
-export type CartItem = {
+/** The store a cart item belongs to. Every item carries one: carts are per store. */
+export type StoreRef = {
+  storeId: string;
+  storeName: string;
+  storeSlug?: string;
+  storeLogo?: string | null;
+};
+
+export type CartItem = StoreRef & {
   /** id, or id::variant when the product has variants */
   key: string;
   id: string;
@@ -16,17 +24,35 @@ export type PromoInfo = {
   percentOff: number;
 };
 
-export type CartState = {
-  items: CartItem[];
-  addressId: string;
-  phone: string;
+/** Checkout choices that belong to one store's cart. */
+export type StoreCartSettings = {
   deliveryMethod: string;
   promo: PromoInfo | null;
+};
+
+export type CartState = {
+  /** Every item in the cart, across stores; each one knows its store */
+  items: CartItem[];
+  /** Delivery method and promo per store, keyed by storeId */
+  stores: Record<string, StoreCartSettings>;
+  /** Shared by every store's checkout */
+  addressId: string;
+  phone: string;
   /** true once the saved cart has been loaded from localStorage */
   hydrated: boolean;
 };
 
+/** One store's slice of the cart, as the drawer shows it. */
+export type StoreCartGroup = StoreRef & {
+  items: CartItem[];
+  count: number;
+  itemsTotal: number;
+  deliveryMethod: string;
+  promo: PromoInfo | null;
+};
+
 export type ValidatePromoRequest = {
+  storeId: string;
   code: string;
   itemsTotal: number;
 };
@@ -37,7 +63,9 @@ export type PlaceOrderItem = {
   variant?: string;
 };
 
+/** One order is placed per store. */
 export type PlaceOrderRequest = {
+  storeId: string;
   items: PlaceOrderItem[];
   addressId: string;
   phone: string;
@@ -57,18 +85,16 @@ export type OrderResponse = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Server-side cart (sync across devices, and for a signed-in user's    */
-/* abandoned-cart recovery). Line items reuse PlaceOrderItem's shape —  */
-/* the server always re-derives name/price/image from its own catalog. */
+/* Server-side cart: one saved cart per store (sync across devices, and  */
+/* abandoned-cart recovery). Line items reuse PlaceOrderItem's shape —   */
+/* the server always re-derives name/price/image from its own catalog.   */
 /* ------------------------------------------------------------------ */
 
 /**
  * Line items reuse PlaceOrderItem's required fields (productId, quantity,
- * variant). The display fields are optional add-ons: if the backend ever
- * starts returning them (it already has the catalog on hand when building
- * this response), the merge into the local cart can render the item right
- * away instead of only being able to top up a quantity we already know
- * about locally.
+ * variant). The display fields are optional add-ons: when the backend sends
+ * them, the merge into the local cart can render an item it has never seen on
+ * this device; without them it can only top up quantities of known items.
  */
 export type ServerCartItem = PlaceOrderItem & {
   slug?: string;
@@ -77,24 +103,24 @@ export type ServerCartItem = PlaceOrderItem & {
   price?: number;
 };
 
-export type ServerCart = {
+/** GET /cart returns one of these per store the account has a cart with. */
+export type ServerStoreCart = {
+  storeId: string;
+  storeName?: string;
+  storeSlug?: string;
+  storeLogo?: string | null;
   items: ServerCartItem[];
-  address: string;
-  phone: string;
-  deliveryMethod: string;
-  promo: PromoInfo | null;
-  updatedAt: string;
+  updatedAt?: string;
 };
 
-/** PUT /cart — replaces the account's saved cart with the client's. */
+/** PUT /cart (SyncCartDto): replaces the account's saved cart for ONE store. */
 export type SyncCartRequest = {
+  storeId: string;
   items: PlaceOrderItem[];
 };
 
-/** POST /cart/merge — called right after login to fold a guest cart in. */
-export type MergeCartRequest = {
-  items: PlaceOrderItem[];
-};
+/** POST /cart/merge: folds a guest cart for ONE store in, right after login. */
+export type MergeCartRequest = SyncCartRequest;
 
 /* ------------------------------------------------------------------ */
 /* Pre-checkout validation — client prices/stock can be stale by the    */
@@ -102,6 +128,7 @@ export type MergeCartRequest = {
 /* ------------------------------------------------------------------ */
 
 export type ValidateCartRequest = {
+  storeId: string;
   items: PlaceOrderItem[];
 };
 

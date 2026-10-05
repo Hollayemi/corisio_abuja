@@ -4,7 +4,7 @@ import baseApi from "./baseApi";
 
 /**
  * Staff invitations. Neither call needs a signed-in user: the token in the
- * emailed link is the credential. Signing in afterwards goes through next-auth.
+ * emailed link is the credential. Signing in afterwards goes through the React Query auth hooks (lib/auth/hooks.ts).
  */
 export const adminAuthApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

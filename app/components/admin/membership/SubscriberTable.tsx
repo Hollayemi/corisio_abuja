@@ -25,7 +25,7 @@ export function SubscriberTable({ subscribers }: SubscriberTableProps) {
             <tr key={s.id} className="border-t border-neutral-100">
               <td className="py-4 pr-4">
                 <Link
-                  href={`/admin/customers/${s.customer.id}`}
+                  href={`/d/customers/${s.customer.id}`}
                   className="rounded text-sm font-medium text-neutral-900 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-corisio-blue"
                 >
                   {s.customer.fullName}

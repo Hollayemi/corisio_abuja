@@ -65,7 +65,7 @@ export default function InventoryPage() {
     if (!list || list.items.length === 0) return;
 
     const header = ["Product ID", "Name", "Category", "SKU", "Unit Price", "Stock", "Reorder Level", "Status"];
-    const rows = list.items.map((p:any) => [
+    const rows = list.items.map((p) => [
       p.productId,
       p.name,
       p.category.name,
@@ -76,7 +76,7 @@ export default function InventoryPage() {
       p.stockStatus,
     ]);
     const csv = [header, ...rows]
-      .map((row) => row.map((cell: any) => `"${cell.replace(/"/g, '""')}"`).join(","))
+      .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(","))
       .join("\n");
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });

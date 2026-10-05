@@ -1,20 +1,27 @@
 "use client";
 
-import { getSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import useOpenAuth from "@/app/components/auth/useOpenAuth";
 import {
   ErrorText,
-  GoogleButton,
   OrDivider,
   PasswordField,
   SubmitButton,
   TextField,
 } from "@/app/components/auth/AuthFields";
+import GoogleSignIn from "@/app/components/auth/GoogleSignIn";
+import { useGoogleLogin, useLogin, useLogout } from "@/lib/auth/hooks";
 import { notify } from "@/lib/notify";
-import { firstName, isStaffRole, NO_ADMIN_ACCESS } from "@/lib/auth/staff";
+import {
+  canAccessDashboard,
+  firstName,
+  NO_DASHBOARD_ACCESS,
+  postAuthPath,
+} from "@/lib/auth/staff";
 import { isValidEmail } from "@/lib/auth/validation";
+import { getErrorMessage } from "@/redux/config/errors";
+import type { User } from "@/redux/types";
 import { CheckboxField } from "./AdminAuthFields";
 
 export default function AdminLoginForm({
@@ -28,71 +35,65 @@ export default function AdminLoginForm({
   const router = useRouter();
   const openAuth = useOpenAuth();
 
+  const [login, { isLoading: loggingIn }] = useLogin();
+  const [googleLogin, { isLoading: googleLoggingIn }] = useGoogleLogin();
+  const logout = useLogout();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState(initialError);
-  const [loading, setLoading] = useState(false);
 
+  const loading = loggingIn || googleLoggingIn;
   const valid = isValidEmail(email) && password.length > 0;
+
+  /** Runs after either sign in method succeeds. */
+  function handleSignedIn(user: User) {
+    // A store owner who hasn't set up their store yet finishes that first
+    const setup = postAuthPath(user);
+    if (setup) {
+      router.replace(setup);
+      return;
+    }
+
+    // Customers share this sign in, so make sure this account may open the dashboard
+    if (!canAccessDashboard(user)) {
+      logout();
+      setError(NO_DASHBOARD_ACCESS);
+      return;
+    }
+
+    notify.success(`Welcome, ${firstName(user.name)}`, {
+      message: "You're signed in. Taking you to your dashboard.",
+    });
+    router.replace(callbackUrl);
+    router.refresh();
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!valid || loading) return;
 
-    setLoading(true);
     setError("");
-
     try {
-      const result = await signIn("credentials", {
-        email: email.trim(),
-        password,
-        remember: String(remember),
-        type: "admin",
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Incorrect email or password.");
-        setLoading(false);
-        return;
-      }
-
-      // Customers share this sign in, so make sure this is a staff account
-      const session = await getSession();
-      if (!isStaffRole(session?.user?.role)) {
-        await signOut({ redirect: false });
-        setError(NO_ADMIN_ACCESS);
-        setLoading(false);
-        return;
-      }
-
-      notify.success(`Welcome, ${firstName(session?.user?.name)}`, {
-        message: "You're signed in. Taking you to your dashboard.",
-      });
-      router.replace(callbackUrl);
-      router.refresh();
-    } catch {
-      setError("Something went wrong. Please try again.");
-      setLoading(false);
+      handleSignedIn(await login({ email: email.trim(), password, rememberMe: remember }));
+    } catch (err) {
+      setError(getErrorMessage(err));
     }
   }
 
-  async function handleGoogle() {
-    setLoading(true);
+  async function handleGoogle(idToken: string) {
     setError("");
     try {
-      // Full-page redirect to Google; /admin checks the account is staff
-      await signIn("google", { callbackUrl });
-    } catch {
-      setError("We couldn't reach Google. Please try again.");
-      setLoading(false);
+      handleSignedIn(await googleLogin({ idToken }));
+    } catch (err) {
+      setError(getErrorMessage(err));
     }
   }
 
   return (
     <>
-      <GoogleButton onClick={handleGoogle} disabled={loading} />
+      <GoogleSignIn onCredential={handleGoogle} onError={setError} disabled={loading} />
 
       <div className="my-6">
         <OrDivider />

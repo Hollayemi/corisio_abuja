@@ -20,7 +20,7 @@ const COLUMNS = [
 ];
 
 export function customerHref(id: string) {
-  return `/admin/customers/${id}`;
+  return `/dashboard/customers/${id}`;
 }
 
 export type CustomerRowProps = {

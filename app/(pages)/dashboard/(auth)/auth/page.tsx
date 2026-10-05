@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/auth";
+import { getServerUser } from "@/lib/auth/server";
 import AdminAuthShell from "@/app/components/admin/auth/AdminAuthShell";
 import AdminLoginForm from "@/app/components/admin/auth/AdminLoginForm";
-import { isStaffRole, NO_ADMIN_ACCESS, safeAdminPath } from "@/lib/auth/staff";
+import {
+  canAccessDashboard,
+  needsStoreSetup,
+  NO_DASHBOARD_ACCESS,
+  safeDashboardPath,
+  STORE_SETUP_PATH,
+} from "@/lib/auth/staff";
 
 export const metadata: Metadata = { title: "Admin Sign In" };
 
@@ -13,15 +18,13 @@ export default async function AdminSignInPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const [session, params] = await Promise.all([
-    getServerSession(authOptions),
-    searchParams,
-  ]);
+  const [user, params] = await Promise.all([getServerUser(), searchParams]);
 
-  const callbackUrl = safeAdminPath(params.callbackUrl);
+  const callbackUrl = safeDashboardPath(params.callbackUrl);
 
-  // Already signed in as staff: nothing to do here
-  if (session && isStaffRole(session.user?.role)) redirect(callbackUrl);
+  // Already signed in: nothing to do here
+  if (needsStoreSetup(user)) redirect(STORE_SETUP_PATH);
+  if (canAccessDashboard(user)) redirect(callbackUrl);
 
   return (
     <AdminAuthShell
@@ -31,7 +34,7 @@ export default async function AdminSignInPage({
     >
       <AdminLoginForm
         callbackUrl={callbackUrl}
-        initialError={params.error === "no-access" ? NO_ADMIN_ACCESS : ""}
+        initialError={params.error === "no-access" ? NO_DASHBOARD_ACCESS : ""}
       />
     </AdminAuthShell>
   );

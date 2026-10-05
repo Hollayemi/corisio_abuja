@@ -14,6 +14,7 @@ const backend = axios.create({
 
 async function post(url: string, body: unknown): Promise<AuthPayload | null> {
   try {
+    console.log("POST", url, body);
     const { data } = await backend.post<ApiResponse<AuthPayload>>(url, body);
     return isApiSuccess(data) ? (data.data as AuthPayload) : null;
   } catch {

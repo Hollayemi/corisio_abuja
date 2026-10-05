@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { getSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import {
@@ -10,14 +9,17 @@ import {
   SubmitButton,
   TextField,
 } from "@/app/components/auth/AuthFields";
+import { useLogin, useLogout } from "@/lib/auth/hooks";
 import { notify } from "@/lib/notify";
 import {
+  DASHBOARD_AUTH_PATH,
+  DASHBOARD_PATH,
   firstName,
   formatRole,
   isStaffRole,
   withArticle,
 } from "@/lib/auth/staff";
-import { isValidName, isValidPassword, MIN_PASSWORD_LENGTH } from "@/lib/auth/validation";
+import { isValidName, isValidPassword, PASSWORD_HINT } from "@/lib/auth/validation";
 import { getErrorMessage, isApiError } from "@/redux/config/errors";
 import {
   useAcceptInviteMutation,
@@ -29,7 +31,7 @@ import { LockedField } from "./AdminAuthFields";
 const PILL = "Sign up to Luxol";
 
 /**
- * /admin/auth/invite?token=...  (the link in the invitation email)
+ * /dashboard/auth/invite?token=...  (the link in the invitation email)
  *
  * 1. checks the token with the backend, which says which email and role it is for
  * 2. the invited person fills in their name and a password
@@ -102,7 +104,7 @@ export default function AcceptInviteForm({ token }: { token: string }) {
           </button>
         ) : (
           <Link
-            href="/admin/auth"
+            href={DASHBOARD_AUTH_PATH}
             className="inline-flex h-[52px] w-full items-center justify-center rounded-lg border border-neutral-300 text-sm font-medium text-neutral-900 transition hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue"
           >
             Go to sign in
@@ -116,6 +118,8 @@ export default function AcceptInviteForm({ token }: { token: string }) {
 function SetupForm({ token, email }: { token: string; email: string }) {
   const router = useRouter();
   const [acceptInvite] = useAcceptInviteMutation();
+  const [login] = useLogin();
+  const logout = useLogout();
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -144,24 +148,18 @@ function SetupForm({ token, email }: { token: string; email: string }) {
 
     // Account exists now. Sign them straight in.
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        remember: "true",
-        redirect: false,
-      });
-      const session = result?.error ? null : await getSession();
+      const user = await login({ email, password, rememberMe: true });
 
-      if (session && isStaffRole(session.user?.role)) {
+      if (isStaffRole(user.role)) {
         notify.success(`Welcome, ${firstName(name)}`, {
           message: "Your account is ready. Taking you to your dashboard.",
         });
-        router.replace("/admin");
+        router.replace(DASHBOARD_PATH);
         router.refresh();
         return;
       }
 
-      if (session) await signOut({ redirect: false });
+      logout();
     } catch {
       // fall through to the sign in page below
     }
@@ -169,7 +167,7 @@ function SetupForm({ token, email }: { token: string; email: string }) {
     notify.success("Account created", {
       message: "Sign in with your new password to continue.",
     });
-    router.replace("/admin/auth");
+    router.replace(DASHBOARD_AUTH_PATH);
   }
 
   return (
@@ -199,7 +197,7 @@ function SetupForm({ token, email }: { token: string; email: string }) {
           setError("");
         }}
         placeholder="Enter password"
-        hint={`At least ${MIN_PASSWORD_LENGTH} characters`}
+        hint={PASSWORD_HINT}
       />
 
       <div>

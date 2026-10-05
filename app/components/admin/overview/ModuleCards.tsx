@@ -142,7 +142,7 @@ export default function ModuleCards({ modules }: { modules: AdminOverviewModules
         footerIcon={<AdminIcon name="package" className="size-6" />}
         caption="Next delivery window"
         headline={meatBox.nextDeliveryWindow ?? "Nothing scheduled"}
-        href="/admin/orders"
+        href="/dashboard/orders"
       />
       <ModuleCard
         tone="teal"
@@ -157,7 +157,7 @@ export default function ModuleCards({ modules }: { modules: AdminOverviewModules
         footerIcon={<AdminIcon name="freezerPlanner" className="size-6" />}
         caption="Next delivery window"
         headline={freezerPlanner.nextDeliveryWindow ?? "Nothing scheduled"}
-        href="/admin/orders"
+        href="/dashboard/orders"
       />
       <ModuleCard
         tone="purple"
@@ -173,7 +173,7 @@ export default function ModuleCards({ modules }: { modules: AdminOverviewModules
         caption="Expected recurring revenue"
         headlineValue={membership.expectedRecurringRevenue}
         format={formatNaira}
-        href="/admin/membership"
+        href="/dashboard/membership"
       />
       <ModuleCard
         tone="orange"
@@ -194,7 +194,7 @@ export default function ModuleCards({ modules }: { modules: AdminOverviewModules
               } immediate attention`
             : "Stock levels look healthy"
         }
-        href="/admin/inventory"
+        href="/dashboard/inventory"
       />
     </motion.div>
   );

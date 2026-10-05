@@ -2,35 +2,38 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useDialog } from "@/app/components/dialog/DialogProvider";
 import { CloseIcon } from "@/app/components/ui/icons";
-import { getErrorMessage } from "@/redux/config/errors";
 import {
-  useForgotPasswordMutation,
-  useRegisterMutation,
-} from "@/redux/slices/authApi";
+  useForgotPassword,
+  useGoogleLogin,
+  useLogin,
+  useRegister,
+} from "@/lib/auth/hooks";
+import { postAuthPath } from "@/lib/auth/staff";
 import {
   isValidEmail,
   isValidName,
   isValidPassword,
-  MIN_PASSWORD_LENGTH,
+  PASSWORD_HINT,
 } from "@/lib/auth/validation";
+import { getErrorMessage } from "@/redux/config/errors";
+import { SignupAccountType, type User } from "@/redux/types";
 import {
+  AccountTypePicker,
   ErrorText,
-  GoogleButton,
   OrDivider,
   PasswordField,
   SubmitButton,
   SwitchPrompt,
   TextField,
 } from "./AuthFields";
+import GoogleSignIn from "./GoogleSignIn";
 import { siteConfig } from "@/app/config/site";
 
 export type AuthView = "login" | "register" | "forgot" | "welcome";
-
-const NETWORK_ERROR = "Something went wrong. Please try again.";
 
 /* ------------------------------------------------------------------ */
 /* Shell                                                               */
@@ -38,12 +41,29 @@ const NETWORK_ERROR = "Something went wrong. Please try again.";
 
 export default function AuthDialog({
   initialView = "login",
+  initialAccountType = SignupAccountType.CUSTOMER,
 }: {
   initialView?: AuthView;
+  /** Which "I'm signing up as" option starts selected on the register form. */
+  initialAccountType?: SignupAccountType;
 }) {
   const { closeDialog } = useDialog();
+  const router = useRouter();
   const [view, setView] = useState<AuthView>(initialView);
   const [welcomeName, setWelcomeName] = useState("");
+
+  /**
+   * Someone just signed in or registered. A store owner who hasn't set up
+   * their store yet goes to the store setup page; everyone else stays put.
+   * Returns true when it navigated away.
+   */
+  function leaveForSetup(user: User) {
+    const next = postAuthPath(user);
+    if (!next) return false;
+    closeDialog();
+    router.push(next);
+    return true;
+  }
 
   return (
     <div className="relative flex h-full flex-col overflow-y-auto px-8 pb-10 pt-10">
@@ -51,7 +71,7 @@ export default function AuthDialog({
         type="button"
         onClick={closeDialog}
         aria-label="Close"
-        className="absolute right-4 top-4 rounded-md p-1.5 text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-luxol-green"
+        className="absolute right-4 top-4 rounded-md p-1.5 text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue"
       >
         <CloseIcon className="size-5" />
       </button>
@@ -67,14 +87,21 @@ export default function AuthDialog({
       )}
 
       {view === "login" && (
-        <LoginForm onSwitch={setView} onDone={closeDialog} />
+        <LoginForm
+          onSwitch={setView}
+          onSignedIn={(user) => {
+            if (!leaveForSetup(user)) closeDialog();
+          }}
+        />
       )}
 
       {view === "register" && (
         <RegisterForm
+          initialAccountType={initialAccountType}
           onSwitch={setView}
-          onRegistered={(name) => {
-            setWelcomeName(name);
+          onRegistered={(user) => {
+            if (leaveForSetup(user)) return;
+            setWelcomeName(user.name);
             setView("welcome");
           }}
         />
@@ -106,28 +133,35 @@ function Heading({ title, subtitle }: { title: string; subtitle: string }) {
 
 function GoogleSection({
   disabled,
+  accountType,
+  onSignedIn,
   onError,
 }: {
   disabled: boolean;
+  /** Only sent on the register form (GoogleDto.accountType); sign in leaves it out. */
+  accountType?: SignupAccountType;
+  onSignedIn: (user: User) => void;
   onError: (message: string) => void;
 }) {
-  const [loading, setLoading] = useState(false);
+  const [googleLogin, { isLoading }] = useGoogleLogin();
 
-  async function handleClick() {
-    setLoading(true);
+  async function handleCredential(idToken: string) {
     try {
-      // Full-page redirect to Google, then back to the page you were on
-      await signIn("google", { callbackUrl: window.location.href });
-    } catch {
-      onError("We couldn't reach Google. Please try again.");
-      setLoading(false);
+      onSignedIn(await googleLogin({ idToken, accountType }));
+    } catch (err) {
+      onError(getErrorMessage(err));
     }
   }
 
   return (
     <>
       <OrDivider />
-      <GoogleButton onClick={handleClick} disabled={disabled || loading} />
+      <GoogleSignIn
+        onCredential={handleCredential}
+        onError={onError}
+        disabled={disabled || isLoading}
+        text={accountType ? "signup_with" : "continue_with"}
+      />
     </>
   );
 }
@@ -138,42 +172,28 @@ function GoogleSection({
 
 function LoginForm({
   onSwitch,
-  onDone,
+  onSignedIn,
 }: {
   onSwitch: (view: AuthView) => void;
-  onDone: () => void;
+  onSignedIn: (user: User) => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  const [login, { isLoading }] = useLogin();
 
   const valid = isValidEmail(email) && password.length > 0;
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!valid || loading) return;
+    if (!valid || isLoading) return;
 
-    setLoading(true);
     setError("");
-
     try {
-      const result = await signIn("credentials", {
-        email: email.trim(),
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Incorrect email or password.");
-        setLoading(false);
-        return;
-      }
-
-      onDone();
-    } catch {
-      setError(NETWORK_ERROR);
-      setLoading(false);
+      onSignedIn(await login({ email: email.trim(), password, rememberMe: true }));
+    } catch (err) {
+      setError(getErrorMessage(err));
     }
   }
 
@@ -213,7 +233,11 @@ function LoginForm({
 
         {error && <ErrorText>{error}</ErrorText>}
 
-        <SubmitButton disabled={!valid} loading={loading} loadingText="Signing in...">
+        <SubmitButton
+          disabled={!valid}
+          loading={isLoading}
+          loadingText="Signing in..."
+        >
           Sign In
         </SubmitButton>
       </form>
@@ -221,13 +245,17 @@ function LoginForm({
       <button
         type="button"
         onClick={() => onSwitch("forgot")}
-        className="mx-auto mt-5 text-xs font-medium text-luxol-green hover:underline focus-visible:outline-2 focus-visible:outline-luxol-green"
+        className="mx-auto mt-5 text-xs font-medium text-corisio-blue hover:underline focus-visible:outline-2 focus-visible:outline-corisio-blue"
       >
         Forget Password
       </button>
 
       <div className="mt-5 space-y-5">
-        <GoogleSection disabled={loading} onError={setError} />
+        <GoogleSection
+          disabled={isLoading}
+          onSignedIn={onSignedIn}
+          onError={setError}
+        />
         <SwitchPrompt
           text="Don't have an account?"
           action="Register"
@@ -243,59 +271,45 @@ function LoginForm({
 /* ------------------------------------------------------------------ */
 
 function RegisterForm({
+  initialAccountType,
   onSwitch,
   onRegistered,
 }: {
+  initialAccountType: SignupAccountType;
   onSwitch: (view: AuthView) => void;
-  onRegistered: (name: string) => void;
+  onRegistered: (user: User) => void;
 }) {
+  const [accountType, setAccountType] =
+    useState<SignupAccountType>(initialAccountType);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const [registerUser] = useRegisterMutation();
+  const [register, { isLoading }] = useRegister();
 
+  const isStoreOwner = accountType === SignupAccountType.STORE_OWNER;
   const valid =
     isValidName(name) && isValidEmail(email) && isValidPassword(password);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!valid || loading) return;
+    if (!valid || isLoading) return;
 
-    setLoading(true);
     setError("");
-
     try {
-      await registerUser({
-        name: name.trim(),
-        email: email.trim(),
-        password,
-      }).unwrap();
+      onRegistered(
+        await register({
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim() || undefined,
+          password,
+          accountType,
+        }),
+      );
     } catch (err) {
       setError(getErrorMessage(err));
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const signedIn = await signIn("credentials", {
-        email: email.trim(),
-        password,
-        redirect: false,
-      });
-
-      if (signedIn?.error) {
-        setError("Your account was created, but we couldn't sign you in. Please log in.");
-        setLoading(false);
-        return;
-      }
-
-      onRegistered(name.trim());
-    } catch {
-      setError(NETWORK_ERROR);
-      setLoading(false);
     }
   }
 
@@ -303,12 +317,18 @@ function RegisterForm({
     <>
       <Heading
         title="Create your account"
-        subtitle="Save your details, track your orders and make your next shop even easier."
+        subtitle={
+          isStoreOwner
+            ? "Create your account first, then set up your store profile."
+            : "Save your details, track your orders and make your next shop even easier."
+        }
       />
 
       <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+        <AccountTypePicker value={accountType} onChange={setAccountType} />
+
         <TextField
-          label="Full Name"
+          label={isStoreOwner ? "Your Full Name" : "Full Name"}
           name="name"
           autoComplete="name"
           autoFocus
@@ -333,6 +353,19 @@ function RegisterForm({
           placeholder="Enter your email address"
         />
 
+        <TextField
+          label="Phone Number (optional)"
+          type="tel"
+          name="phone"
+          autoComplete="tel"
+          value={phone}
+          onChange={(e) => {
+            setPhone(e.target.value);
+            setError("");
+          }}
+          placeholder="Enter your phone number"
+        />
+
         <PasswordField
           label="Password"
           name="password"
@@ -343,22 +376,27 @@ function RegisterForm({
             setError("");
           }}
           placeholder="Enter your password"
-          hint={`At least ${MIN_PASSWORD_LENGTH} characters`}
+          hint={PASSWORD_HINT}
         />
 
         {error && <ErrorText>{error}</ErrorText>}
 
         <SubmitButton
           disabled={!valid}
-          loading={loading}
+          loading={isLoading}
           loadingText="Creating account..."
         >
-          Create Account
+          {isStoreOwner ? "Create Account & Set Up Store" : "Create Account"}
         </SubmitButton>
       </form>
 
       <div className="mt-5 space-y-5">
-        <GoogleSection disabled={loading} onError={setError} />
+        <GoogleSection
+          disabled={isLoading}
+          accountType={accountType}
+          onSignedIn={onRegistered}
+          onError={setError}
+        />
         <SwitchPrompt
           text="Already have an account?"
           action="Log In"
@@ -376,27 +414,23 @@ function RegisterForm({
 function ForgotForm({ onSwitch }: { onSwitch: (view: AuthView) => void }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [sentTo, setSentTo] = useState("");
 
-  const [forgotPassword] = useForgotPasswordMutation();
+  const [forgotPassword, { isLoading }] = useForgotPassword();
 
   const valid = isValidEmail(email);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!valid || loading) return;
+    if (!valid || isLoading) return;
 
-    setLoading(true);
     setError("");
-
     try {
       await forgotPassword({ email: email.trim() }).unwrap();
       setSentTo(email.trim());
     } catch (err) {
       setError(getErrorMessage(err));
     }
-    setLoading(false);
   }
 
   return (
@@ -409,7 +443,7 @@ function ForgotForm({ onSwitch }: { onSwitch: (view: AuthView) => void }) {
       {sentTo ? (
         <p
           role="status"
-          className="mt-9 rounded-lg bg-[#e6f3e4] px-4 py-4 text-sm leading-relaxed text-luxol-green"
+          className="mt-9 rounded-lg bg-[#e6f3e4] px-4 py-4 text-sm leading-relaxed text-corisio-blue"
         >
           If an account exists for <span className="font-semibold">{sentTo}</span>,
           we&rsquo;ve sent a link to reset your password. Check your inbox.
@@ -434,7 +468,7 @@ function ForgotForm({ onSwitch }: { onSwitch: (view: AuthView) => void }) {
 
           <SubmitButton
             disabled={!valid}
-            loading={loading}
+            loading={isLoading}
             loadingText="Sending..."
           >
             Send Reset Link
@@ -494,7 +528,7 @@ function Welcome({ name, onDone }: { name: string; onDone: () => void }) {
       <Link
         href="/shop"
         onClick={onDone}
-        className="mt-8 inline-flex h-[52px] w-full items-center justify-center rounded-lg bg-luxol-green text-sm font-medium text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-luxol-green"
+        className="mt-8 inline-flex h-[52px] w-full items-center justify-center rounded-lg bg-corisio-blue text-sm font-medium text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue"
       >
         Start Shopping
       </Link>

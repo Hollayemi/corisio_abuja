@@ -53,7 +53,7 @@ export function CustomerHeader({ customer }: CustomerHeaderProps) {
   return (
     <div>
       <Link
-        href="/admin/customers"
+        href="/dashboard/customers"
         className="inline-flex items-center gap-2 rounded text-sm text-neutral-700 transition hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-corisio-blue"
       >
         <AdminIcon name="arrowLeft" className="size-4" />

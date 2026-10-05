@@ -1,19 +1,21 @@
 "use client";
 
-import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useLogout } from "@/lib/auth/hooks";
+import { DASHBOARD_AUTH_PATH } from "@/lib/auth/staff";
 import { notify } from "@/lib/notify";
 
 export default function AdminSignOutButton() {
   const router = useRouter();
+  const logout = useLogout();
   const [loading, setLoading] = useState(false);
 
   async function handleClick() {
     setLoading(true);
-    await signOut({ redirect: false });
+    logout();
     notify.info("Signed out", { message: "See you soon." });
-    router.replace("/admin/auth");
+    router.replace(DASHBOARD_AUTH_PATH);
     router.refresh();
   }
 

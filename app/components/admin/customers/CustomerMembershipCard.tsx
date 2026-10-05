@@ -72,7 +72,7 @@ export function CustomerMembershipCard({ membership }: CustomerMembershipCardPro
         </table>
 
         <Link
-          href="/admin/membership"
+          href="/dashboard/membership"
           className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#e7f4e4] px-4 py-2.5 text-sm font-medium text-corisio-blue transition hover:brightness-95"
         >
           View Membership

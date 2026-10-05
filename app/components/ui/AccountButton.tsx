@@ -1,8 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
 import { GemIcon, HeartIcon, UserIcon } from "./icons";
+import { useAuth, useLogout } from "@/lib/auth/hooks";
+import {
+  canAccessDashboard,
+  DASHBOARD_PATH,
+  hasStore,
+  needsStoreSetup,
+  STORE_SETUP_PATH,
+} from "@/lib/auth/staff";
 import useOpenAuth from "../auth/useOpenAuth";
 
 const base =
@@ -21,7 +28,8 @@ export default function AccountButton({
   /** Called when the user picks an action (e.g. to close a mobile menu). */
   onAction?: () => void;
 }) {
-  const { data: session, status } = useSession();
+  const { user, status } = useAuth();
+  const logout = useLogout();
   const openAuth = useOpenAuth();
   const height = size === "lg" ? "h-11" : "h-10";
 
@@ -35,14 +43,14 @@ export default function AccountButton({
   }
 
   if (status === "authenticated") {
-    const label = session.user?.name || session.user?.email || "Account";
+    const label = user?.name || user?.email || "Account";
     const firstName = label.split(/\s+/)[0];
 
     return (
       <details className="group relative">
         <summary
           className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-lg text-white transition hover:text-corisio-yellow [&::-webkit-details-marker]:hidden"
-          aria-label={`Account, ${name}`}
+          aria-label={`Account, ${label}`}
         >
           <UserIcon className="h-5 w-5" />
         </summary>
@@ -50,7 +58,7 @@ export default function AccountButton({
         <div className="absolute right-0 top-full z-30 mt-2 w-56 rounded-lg border border-neutral-200 bg-white p-2 text-neutral-900 shadow-lg">
           <p className="truncate px-3 py-2 text-xs text-neutral-500">
             Hi, {firstName}
-            {session.user?.email ? ` · ${session.user.email}` : ""}
+            {user?.email ? ` · ${user.email}` : ""}
           </p>
           <Link
             href="/account"
@@ -66,11 +74,20 @@ export default function AccountButton({
           >
             My Orders
           </Link>
+          {(needsStoreSetup(user) || canAccessDashboard(user)) && (
+            <Link
+              href={needsStoreSetup(user) ? STORE_SETUP_PATH : DASHBOARD_PATH}
+              onClick={onAction}
+              className="block rounded-md px-3 py-2 text-sm hover:bg-neutral-50"
+            >
+              {needsStoreSetup(user) ? "Set Up My Store" : hasStore(user) ? "My Store" : "Dashboard"}
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => {
               onAction?.();
-              void signOut({ redirect: false });
+              logout();
             }}
             className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-neutral-50"
           >

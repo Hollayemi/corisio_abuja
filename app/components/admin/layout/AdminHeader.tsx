@@ -28,7 +28,6 @@ export default function AdminHeader({
 
   return (
     <header className="flex h-[76px] shrink-0 items-center gap-4 bg-white px-4 lg:gap-0 lg:px-0">
-      {/* Logo + sidebar toggle. Same width as the sidebar so search lines up with the content. */}
       <div className="flex shrink-0 items-center gap-3 lg:w-[266px] lg:justify-between lg:pl-8 lg:pr-7">
         <button
           type="button"
@@ -41,9 +40,9 @@ export default function AdminHeader({
           <AdminIcon name="menu" className="size-6" />
         </button>
 
-        <Link href="/admin" aria-label={`${siteConfig.name} admin home`}>
+        <Link href="/dashboard" aria-label={`${siteConfig.name} admin home`}>
           <Image
-            src="/logo-horizontal.png"
+            src="/logo-h.png"
             alt={siteConfig.name}
             width={130}
             height={42}

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import DialogHeader from "@/app/components/dialog/DialogHeader";
 import { useDialog } from "@/app/components/dialog/DialogProvider";
 import {
@@ -12,7 +12,8 @@ import {
 } from "@/app/components/ui/icons";
 import { formatNaira } from "@/app/utils/product";
 import { getErrorMessage } from "@/redux/config/errors";
-import { useAppSelector, useCart } from "@/redux/hooks";
+import { useAuth } from "@/lib/auth/hooks";
+import { useCart } from "@/redux/hooks";
 import {
   useGetDeliveryMethodsQuery,
   usePlaceOrderMutation,
@@ -22,10 +23,9 @@ import {
 } from "@/redux/slices/cartApi";
 import { MAX_QUANTITY } from "@/redux/slices/cartSlice";
 import { useListAddressesQuery } from "@/redux/slices/usersApi";
-import { type CartItem } from "@/redux/types";
+import { type CartItem, type PromoInfo, type StoreCartGroup } from "@/redux/types";
 import { DELIVERY_METHODS } from "@/redux/types/checkout";
 import type { Address } from "@/redux/types/users";
-import { useRouter } from "next/navigation";
 
 const fieldClass =
   "h-[52px] w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-corisio-blue focus:outline-none focus:ring-2 focus:ring-corisio-blue/30";
@@ -49,11 +49,9 @@ function addressLine(a: Address) {
 
 export default function CartDrawer() {
   const cart = useCart();
-  const [orderId, setOrderId] = useState<string | null>(null);
 
-  if (orderId) return <OrderSuccess orderId={orderId} />;
   if (cart.items.length === 0) return <EmptyCart />;
-  return <CartContents onPlaced={setOrderId} />;
+  return <CartContents />;
 }
 
 /* ------------------------------------------------------------------ */
@@ -98,181 +96,52 @@ function EmptyCart() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Order placed                                                        */
+/* Cart with items: delivery details, then one section per store       */
 /* ------------------------------------------------------------------ */
 
-function OrderSuccess({ orderId }: { orderId: string }) {
-  const { closeDialog } = useDialog();
+type SharedErrors = { address?: string; phone?: string };
 
-  return (
-    <div className="flex h-full flex-col">
-      <DialogHeader title="Your Cart" />
-
-      <div
-        role="status"
-        className="flex flex-1 flex-col items-center justify-center px-6 pb-20 text-center"
-      >
-        <svg viewBox="0 0 80 80" aria-hidden="true" className="size-20">
-          <defs>
-            <linearGradient id="order-ok" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#4fb04a" />
-              <stop offset="1" stopColor="#86d97a" />
-            </linearGradient>
-          </defs>
-          <rect width="80" height="80" rx="22" fill="url(#order-ok)" />
-          <path
-            d="M24 41l11 11 21-23"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-
-        <h3 className="mt-8 text-xl font-bold text-neutral-900">
-          Order placed successfully!
-        </h3>
-        <p className="mt-3 text-sm text-neutral-500">
-          Thank you for shopping with Luxol.
-        </p>
-
-        <p className="mt-6 text-sm font-semibold text-neutral-900">
-          Order #{orderId}
-        </p>
-        <p className="mt-1 text-sm text-neutral-500">
-          Your order has been received and is being prepared.
-        </p>
-
-        <Link
-          href={`/orders/${orderId}`}
-          onClick={closeDialog}
-          className={`${primaryButton} mt-8`}
-        >
-          Track Order
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Cart with items                                                     */
-/* ------------------------------------------------------------------ */
-
-type Errors = { address?: string; phone?: string; method?: string };
-
-function CartContents({ onPlaced }: { onPlaced: (orderId: string) => void }) {
-  const router = useRouter()
+function CartContents() {
   const cart = useCart();
   const { closeDialog } = useDialog();
-  const isAuthenticated = useAppSelector((s) => s.session.status === "authenticated");
-  const [placeOrder] = usePlaceOrderMutation();
-  const [validateCart] = useValidateCartMutation();
-  const [syncCart] = useSyncCartMutation();
 
-  const { data: deliveryMethodsData } = useGetDeliveryMethodsQuery();
-  const deliveryMethods = deliveryMethodsData?.data ?? DELIVERY_METHODS;
-
+  // Address and receiver phone are the same whichever store you check out from
   const [addressId, setAddressId] = useState(cart.addressId ?? "");
-  const [errors, setErrors] = useState<Errors>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+  const [sharedErrors, setSharedErrors] = useState<SharedErrors>({});
 
-  const method = deliveryMethods.find((m) => m.id === cart.deliveryMethod);
-  const percentOff = cart.promo?.percentOff ?? 0;
-  const discount = Math.round((cart.itemsTotal * percentOff) / 100);
-  const deliveryFee = method?.fee ?? 0;
-  const total = cart.itemsTotal - discount + deliveryFee;
+  // Store sections open/closed. The first store starts open; the rest start closed.
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const isOpen = (storeId: string, index: number) => open[storeId] ?? index === 0;
 
-  async function handleCheckout() {
-    const next: Errors = {};
+  /** Checks the shared details; a store's Checkout button calls this first. */
+  function validateShared() {
+    const next: SharedErrors = {};
     if (!addressId) next.address = "Select a delivery address.";
     if (cart.phone.replace(/\D/g, "").length < 10) {
       next.phone = "Enter a valid phone number.";
     }
-    if (!method) next.method = "Select a delivery method.";
-
-    setErrors(next);
-    setSubmitError("");
-    if (Object.keys(next).length > 0) return;
-
-    setSubmitting(true);
-    try {
-      // The server prices the order, so only ids and quantities are sent
-      const items = cart.items.map((i: CartItem) => ({
-        productId: i.id,
-        quantity: i.quantity,
-        variant: i.variant,
-      }));
-
-      // Signed-in customers get their cart saved to the account before
-      // checkout (so it's there if they switch devices, and for abandoned-
-      // cart recovery); best-effort, never blocks checkout.
-      if (isAuthenticated) {
-        syncCart({
-          items
-        }).catch((e) =>  {
-          router
-        });
-      }
-
-      // Re-check stock and current prices right before checkout — the
-      // person may have had this cart open a while.
-      const validation = await validateCart({ items }).unwrap();
-      if (!validation.data.valid) {
-        setSubmitError(
-          validation.data.issues.map((issue) => issue.message).join(" ") ||
-            "Some items in your cart changed. Please review your cart and try again.",
-        );
-        setSubmitting(false);
-        return;
-      }
-
-      const response = await placeOrder({
-        items,
-        addressId,
-        phone: cart.phone.trim(),
-        deliveryMethod: cart.deliveryMethod,
-        promoCode: cart.promo?.code,
-      }).unwrap().then(e => {
-        router.push(e.data.payment.authorizationUrl)
-        cart.clear();
-        onPlaced(e.data.orderNumber);
-      });
-
-    } catch (err) {
-      setSubmitError(
-        getErrorMessage(err, "We couldn't place your order. Please try again."),
-      );
-      setSubmitting(false);
-    }
+    setSharedErrors(next);
+    return Object.keys(next).length === 0;
   }
+
+  const storeCount = cart.groups.length;
 
   return (
     <div className="flex h-full flex-col">
       <DialogHeader title={`Your Cart (${cart.count})`} />
 
       <div className="flex-1 overflow-y-auto px-6 pb-8">
-        {/* Items */}
-        <ul className="pt-2">
-          {cart.items.map((item: CartItem) => (
-            <CartRow key={item.key} item={item} />
-          ))}
-        </ul>
-
-        <div className="mt-4 space-y-8 border-t border-neutral-200 pt-8">
-          {/* Delivery address */}
+        {/* Delivery details: shared by every store */}
+        <div className="space-y-8 pt-2">
           <AddressSection
             selectedId={addressId}
-            error={errors.address}
+            error={sharedErrors.address}
             onSelect={(id) => {
               setAddressId(id);
-              setErrors((e) => ({ ...e, address: undefined }));
+              setSharedErrors((e) => ({ ...e, address: undefined }));
             }}
           />
 
-          {/* Phone */}
           <div>
             <label htmlFor="cart-phone" className={labelClass}>
               Receiver&rsquo;s Phone Number
@@ -285,92 +154,290 @@ function CartContents({ onPlaced }: { onPlaced: (orderId: string) => void }) {
               value={cart.phone}
               onChange={(e) => {
                 cart.setPhone(e.target.value);
-                setErrors((prev) => ({ ...prev, phone: undefined }));
+                setSharedErrors((prev) => ({ ...prev, phone: undefined }));
               }}
               placeholder="Enter receiver's phone number"
-              aria-invalid={errors.phone ? true : undefined}
-              aria-describedby={errors.phone ? "cart-phone-error" : undefined}
+              aria-invalid={sharedErrors.phone ? true : undefined}
+              aria-describedby={sharedErrors.phone ? "cart-phone-error" : undefined}
               className={`${fieldClass} mt-3`}
             />
-            {errors.phone && (
+            {sharedErrors.phone && (
               <p id="cart-phone-error" role="alert" className="mt-2 text-xs text-red-600">
-                {errors.phone}
+                {sharedErrors.phone}
               </p>
             )}
-          </div>
-
-          <hr className="border-neutral-200" />
-
-          {/* Promo code */}
-          <PromoSection percentOff={percentOff} />
-
-          {/* Delivery method */}
-          <div>
-            <label htmlFor="cart-method" className={labelClass}>
-              Select Delivery Method
-            </label>
-            <div className="relative mt-3">
-              <select
-                id="cart-method"
-                value={cart.deliveryMethod}
-                onChange={(e) => {
-                  cart.setDeliveryMethod(e.target.value);
-                  setErrors((prev) => ({ ...prev, method: undefined }));
-                }}
-                aria-invalid={errors.method ? true : undefined}
-                aria-describedby={errors.method ? "cart-method-error" : undefined}
-                className={`${fieldClass} appearance-none pr-11 ${cart.deliveryMethod ? "text-neutral-900" : "text-neutral-400"
-                  }`}
-              >
-                <option value="">Select delivery method</option>
-                {deliveryMethods.map((m) => (
-                  <option key={m.id} value={m.id} className="text-neutral-900">
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDownIcon className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-neutral-700" />
-            </div>
-            {errors.method && (
-              <p id="cart-method-error" role="alert" className="mt-2 text-xs text-red-600">
-                {errors.method}
-              </p>
-            )}
-          </div>
-
-          {/* Totals */}
-          <dl className="space-y-3 pt-2 text-xs text-neutral-600">
-            <TotalRow label="Items Total" value={formatNaira(cart.itemsTotal)} />
-            <TotalRow label="Discount" value={formatNaira(discount)} />
-            <TotalRow label="Delivery Fee" value={formatNaira(deliveryFee)} />
-            <div className="flex items-center justify-between pt-3 text-sm">
-              <dt className="text-neutral-700">Total</dt>
-              <dd className="font-bold text-neutral-900">{formatNaira(total)}</dd>
-            </div>
-          </dl>
-
-          {/* Actions */}
-          <div className="space-y-3">
-            {submitError && (
-              <p role="alert" className="text-sm text-red-600">
-                {submitError}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={handleCheckout}
-              disabled={submitting}
-              className={primaryButton}
-            >
-              {submitting ? "Placing order..." : "Checkout"}
-            </button>
-            <button type="button" onClick={closeDialog} className={outlineButton}>
-              Back to Shopping
-            </button>
           </div>
         </div>
+
+        <hr className="my-8 border-neutral-200" />
+
+        <p className="text-sm text-neutral-600">
+          {storeCount > 1
+            ? `You're buying from ${storeCount} stores. Each store is a separate order: choose its delivery method and check out below.`
+            : "Choose a delivery method and check out below."}
+        </p>
+
+        <div className="mt-4 space-y-4">
+          {cart.groups.map((group, index) => (
+            <StoreSection
+              key={group.storeId}
+              group={group}
+              expanded={isOpen(group.storeId, index)}
+              onToggle={() =>
+                setOpen((prev) => ({ ...prev, [group.storeId]: !isOpen(group.storeId, index) }))
+              }
+              addressId={addressId}
+              validateShared={validateShared}
+            />
+          ))}
+        </div>
+
+        <button type="button" onClick={closeDialog} className={`${outlineButton} mt-8`}>
+          Back to Shopping
+        </button>
       </div>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* One store: collapsible header, its items, and its own checkout       */
+/* ------------------------------------------------------------------ */
+
+type StoreErrors = { method?: string };
+
+function StoreAvatar({ group }: { group: StoreCartGroup }) {
+  if (group.storeLogo) {
+    return (
+      <span className="relative size-10 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-white">
+        <Image src={group.storeLogo} alt="" fill sizes="40px" className="object-cover" />
+      </span>
+    );
+  }
+
+  return (
+    <span
+      aria-hidden="true"
+      className="flex size-10 shrink-0 items-center justify-center rounded-full bg-corisio-blue/10 text-sm font-bold text-corisio-blue"
+    >
+      {group.storeName.trim().charAt(0).toUpperCase() || "S"}
+    </span>
+  );
+}
+
+function StoreSection({
+  group,
+  expanded,
+  onToggle,
+  addressId,
+  validateShared,
+}: {
+  group: StoreCartGroup;
+  expanded: boolean;
+  onToggle: () => void;
+  addressId: string;
+  validateShared: () => boolean;
+}) {
+  const cart = useCart();
+  const { isAuthenticated } = useAuth();
+  const [placeOrder] = usePlaceOrderMutation();
+  const [validateCart] = useValidateCartMutation();
+  const [syncCart] = useSyncCartMutation();
+
+  const panelId = useId();
+  const methodId = useId();
+
+  // This store's own delivery methods (falls back to the static list)
+  const { data: deliveryMethodsData } = useGetDeliveryMethodsQuery(group.storeId, {
+    skip: !expanded,
+  });
+  const deliveryMethods = deliveryMethodsData?.data ?? DELIVERY_METHODS;
+
+  const [errors, setErrors] = useState<StoreErrors>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  const method = deliveryMethods.find((m) => m.id === group.deliveryMethod);
+  const percentOff = group.promo?.percentOff ?? 0;
+  const discount = Math.round((group.itemsTotal * percentOff) / 100);
+  const deliveryFee = method?.fee ?? 0;
+  const total = group.itemsTotal - discount + deliveryFee;
+
+  async function handleCheckout() {
+    const next: StoreErrors = {};
+    if (!method) next.method = "Select a delivery method.";
+
+    setErrors(next);
+    setSubmitError("");
+
+    const sharedOk = validateShared();
+    if (!sharedOk) {
+      setSubmitError(
+        "Add your delivery address and receiver's phone number at the top of your cart.",
+      );
+    }
+    if (Object.keys(next).length > 0 || !sharedOk) return;
+
+    setSubmitting(true);
+    try {
+      // The server prices the order, so only ids and quantities are sent
+      const items = group.items.map((i: CartItem) => ({
+        productId: i.id,
+        quantity: i.quantity,
+        variant: i.variant,
+      }));
+
+      // Signed-in customers get this store's cart saved to the account before
+      // checkout (so it's there if they switch devices, and for abandoned-
+      // cart recovery); best-effort, never blocks checkout.
+      if (isAuthenticated) {
+        syncCart({ storeId: group.storeId, items }).unwrap().catch(() => {});
+      }
+
+      // Re-check stock and current prices right before checkout — the
+      // person may have had this cart open a while.
+      const validation = await validateCart({ storeId: group.storeId, items }).unwrap();
+      if (!validation.data.valid) {
+        setSubmitError(
+          validation.data.issues.map((issue) => issue.message).join(" ") ||
+            "Some items in your cart changed. Please review your cart and try again.",
+        );
+        setSubmitting(false);
+        return;
+      }
+
+      const response = await placeOrder({
+        storeId: group.storeId,
+        items,
+        addressId,
+        phone: cart.phone.trim(),
+        deliveryMethod: group.deliveryMethod.toUpperCase(),
+        promoCode: group.promo?.code,
+      }).unwrap();
+
+      // Only this store's items leave the cart; other stores stay for their own checkout
+      cart.clearStore(group.storeId);
+      window.location.assign(response.data.payment.authorizationUrl);
+    } catch (err) {
+      setSubmitError(
+        getErrorMessage(err, "We couldn't place your order. Please try again."),
+      );
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-neutral-200">
+      {/* Header: tap to collapse / expand */}
+      <h3>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={expanded}
+          aria-controls={panelId}
+          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue"
+        >
+          <StoreAvatar group={group} />
+
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold text-neutral-900">
+              {group.storeName}
+            </span>
+            <span className="block text-xs text-neutral-500">
+              {group.count} {group.count === 1 ? "item" : "items"} ·{" "}
+              {formatNaira(group.itemsTotal)}
+            </span>
+          </span>
+
+          <ChevronDownIcon
+            className={`size-4 shrink-0 text-neutral-700 transition-transform ${
+              expanded ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+      </h3>
+
+      {expanded && (
+        <div id={panelId} className="border-t border-neutral-200 px-4 pb-5">
+          <ul>
+            {group.items.map((item: CartItem) => (
+              <CartRow key={item.key} item={item} />
+            ))}
+          </ul>
+
+          <div className="mt-2 space-y-6 border-t border-neutral-200 pt-6">
+            {/* Promo code (applies to this store's items only) */}
+            <PromoSection
+              storeId={group.storeId}
+              itemsTotal={group.itemsTotal}
+              promo={group.promo}
+            />
+
+            {/* Delivery method for this store */}
+            <div>
+              <label htmlFor={methodId} className={labelClass}>
+                Select Delivery Method
+              </label>
+              <div className="relative mt-3">
+                <select
+                  id={methodId}
+                  value={group.deliveryMethod}
+                  onChange={(e) => {
+                    cart.setDeliveryMethod(group.storeId, e.target.value);
+                    setErrors((prev) => ({ ...prev, method: undefined }));
+                  }}
+                  aria-invalid={errors.method ? true : undefined}
+                  aria-describedby={errors.method ? `${methodId}-error` : undefined}
+                  className={`${fieldClass} appearance-none pr-11 ${
+                    group.deliveryMethod ? "text-neutral-900" : "text-neutral-400"
+                  }`}
+                >
+                  <option value="">Select delivery method</option>
+                  {deliveryMethods.map((m) => (
+                    <option key={m.id} value={m.id} className="text-neutral-900">
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDownIcon className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-neutral-700" />
+              </div>
+              {errors.method && (
+                <p id={`${methodId}-error`} role="alert" className="mt-2 text-xs text-red-600">
+                  {errors.method}
+                </p>
+              )}
+            </div>
+
+            {/* Totals for this store */}
+            <dl className="space-y-3 text-xs text-neutral-600">
+              <TotalRow label="Items Total" value={formatNaira(group.itemsTotal)} />
+              <TotalRow label="Discount" value={formatNaira(discount)} />
+              <TotalRow label="Delivery Fee" value={formatNaira(deliveryFee)} />
+              <div className="flex items-center justify-between pt-3 text-sm">
+                <dt className="text-neutral-700">Total</dt>
+                <dd className="font-bold text-neutral-900">{formatNaira(total)}</dd>
+              </div>
+            </dl>
+
+            <div className="space-y-3">
+              {submitError && (
+                <p role="alert" className="text-sm text-red-600">
+                  {submitError}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={handleCheckout}
+                disabled={submitting}
+                className={primaryButton}
+              >
+                {submitting ? "Placing order..." : `Checkout from ${group.storeName}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -469,7 +536,7 @@ export function AddressSection({
 }) {
   const cart = useCart();
   const { closeDialog } = useDialog();
-  const isAuthenticated = useAppSelector((s) => s.session.status === "authenticated");
+  const { isAuthenticated } = useAuth();
   const { data, isLoading } = useListAddressesQuery(undefined, {
     skip: !isAuthenticated,
   });
@@ -551,23 +618,32 @@ export function AddressSection({
   );
 }
 
-function PromoSection({ percentOff }: { percentOff: number }) {
+/** Promo code for ONE store's items. */
+function PromoSection({
+  storeId,
+  itemsTotal,
+  promo,
+}: {
+  storeId: string;
+  itemsTotal: number;
+  promo: PromoInfo | null;
+}) {
   const cart = useCart();
+  const inputId = useId();
   const [validatePromo, { isLoading }] = useValidatePromoMutation();
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
+
+  const percentOff = promo?.percentOff ?? 0;
 
   async function apply() {
     const code = input.trim().toUpperCase();
     if (!code || isLoading) return;
 
     try {
-      const response = await validatePromo({
-        code,
-        itemsTotal: cart.itemsTotal,
-      }).unwrap();
+      const response = await validatePromo({ storeId, code, itemsTotal }).unwrap();
 
-      cart.setPromo(response.data);
+      cart.setPromo(storeId, response.data);
       setInput("");
       setError("");
     } catch (err) {
@@ -577,19 +653,19 @@ function PromoSection({ percentOff }: { percentOff: number }) {
 
   return (
     <div>
-      <label htmlFor="cart-promo" className={labelClass}>
+      <label htmlFor={inputId} className={labelClass}>
         Add Promo Code (Optional)
       </label>
 
-      {cart.promo ? (
+      {promo ? (
         <div className="mt-3 flex h-[52px] items-center justify-between rounded-lg border border-corisio-blue/40 bg-[#e6f3e4] px-4">
           <p className="text-sm text-corisio-blue">
-            <span className="font-semibold">{cart.promo.code}</span> applied
+            <span className="font-semibold">{promo.code}</span> applied
             {percentOff > 0 ? ` · ${percentOff}% off` : ""}
           </p>
           <button
             type="button"
-            onClick={() => cart.setPromo(null)}
+            onClick={() => cart.setPromo(storeId, null)}
             className="text-xs font-medium text-neutral-700 underline underline-offset-2 hover:text-neutral-900"
           >
             Remove
@@ -599,7 +675,7 @@ function PromoSection({ percentOff }: { percentOff: number }) {
         <>
           <div className="relative mt-3">
             <input
-              id="cart-promo"
+              id={inputId}
               type="text"
               value={input}
               onChange={(e) => {
@@ -615,7 +691,7 @@ function PromoSection({ percentOff }: { percentOff: number }) {
               placeholder="Enter promo code"
               autoCapitalize="characters"
               aria-invalid={error ? true : undefined}
-              aria-describedby={error ? "cart-promo-error" : undefined}
+              aria-describedby={error ? `${inputId}-error` : undefined}
               className={`${fieldClass} pr-24`}
             />
             <button
@@ -628,7 +704,7 @@ function PromoSection({ percentOff }: { percentOff: number }) {
             </button>
           </div>
           {error && (
-            <p id="cart-promo-error" role="alert" className="mt-2 text-xs text-red-600">
+            <p id={`${inputId}-error`} role="alert" className="mt-2 text-xs text-red-600">
               {error}
             </p>
           )}

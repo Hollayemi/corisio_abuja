@@ -41,10 +41,15 @@ export function toCartAddDetail(
   product: StorefrontProduct,
   opts?: { quantity?: number; variant?: string; price?: number },
 ) {
+  console.log("toCartAddDetail", product, opts);
   return {
     id: product.id,
     slug: product.slug,
     name: product.name,
+    storeId: product.store.id,
+    storeName: product.store.name,
+    storeSlug: product.store.slug,
+    storeLogo: product.store.logo ?? null,
     price: opts?.price ?? getDisplayPrice(product).price,
     image: product.images[0],
     quantity: opts?.quantity,
