@@ -17,7 +17,7 @@ export type AvatarProps = {
 export function Avatar({ name, src, className = "size-10" }: AvatarProps) {
   return (
     <span
-      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#dcefd6] text-xs font-semibold text-corisio-blue ${className}`}
+      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-corisio-900 text-xs font-semibold text-corisio-blue ${className}`}
     >
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element

@@ -5,11 +5,35 @@
   --foreground: #171717;
 }
 
+@theme {
+  --color-corisio-900: #4D0E1B;
+  --color-corisio-800: #5C1420;
+  --color-corisio-700: #6B1220;
+  --color-corisio-600: #82212D;
+  --color-corisio-500: #2C337C;
+  --color-corisio-400:   #C46478;
+  --color-corisio-100:   #FBEFF1;
+  --color-gold:       #C9922A;
+  --color-gold-light: #E8B04A;
+  --color-navy:       #121824;
+  --color-navy-2:     #0F1520;
+  --color-bg:         #F3F3F3;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+   --corisio-900: var(--color-corisio-900);
+  --corisio-800: var(--color-corisio-800);
+  --corisio-700: var(--color-corisio-700);
+  --corisio-600: var(--color-corisio-600);
+  --corisio-500: var(--color-corisio-500);
+  --corisio-500: var(--color-corisio-500);
+  --corisio-500: var(--color-corisio-500);
+  --corisio-500: var(--color-corisio-500);
 
   /* Luxol brand colors (estimated from the design; swap in exact hex values) */
   --color-corisio-blue: #2C337C;

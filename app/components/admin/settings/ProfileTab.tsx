@@ -91,7 +91,7 @@ function ProfileForm({ profile, roles }: { profile: AdminProfile; roles: AdminSe
     if (previewRef.current) URL.revokeObjectURL(previewRef.current);
   }, []);
 
-  const dirty = !!avatarFile || (Object.keys(draft) as (keyof Draft)[]).some((k) => draft[k].trim() !== saved[k].trim());
+  const dirty = !!avatarFile || (Object.keys(draft) as (keyof Draft)[]).some((k) => draft[k]?.trim() !== saved[k]?.trim());
   const emailValid = EMAIL_PATTERN.test(draft.email.trim());
   const valid = draft.name.trim() !== "" && emailValid;
 
