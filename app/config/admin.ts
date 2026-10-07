@@ -18,6 +18,7 @@ export const adminNav = {
   core: [
     { label: "Overview", href: "/dashboard", icon: "overview" },
     // TODO: feed the badge from the real number of orders needing attention
+    { label: "Store", href: "/dashboard/store", icon: "store" },
     { label: "Orders", href: "/dashboard/orders", icon: "orders", badge: 0 },
     { label: "Customers", href: "/dashboard/customers", icon: "customers" },
     { label: "Inventory", href: "/dashboard/inventory", icon: "inventory" },

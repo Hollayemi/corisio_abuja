@@ -3,7 +3,7 @@ import { MEMBERSHIP_STATUS_LABELS } from "@/app/components/admin/customers/forma
 import { ACTIVE_STATUS_LABELS } from "./formatters";
 
 const SUBSCRIPTION_STYLES: Record<AdminMembershipStatus, string> = {
-  active: "bg-[#e7f4e4] text-corisio-blue",
+  active: "bg-corisio-100 text-corisio-blue",
   paused: "bg-[#fdf0da] text-amber-700",
   cancelled: "bg-[#fbe9e9] text-red-600",
   expired: "bg-neutral-100 text-neutral-600",
@@ -29,7 +29,7 @@ export function ActiveStatusPill({ status }: ActiveStatusPillProps) {
   return (
     <span
       className={`inline-flex rounded-lg px-4 py-2 text-sm font-medium ${
-        status === "active" ? "bg-[#e7f4e4] text-corisio-blue" : "bg-neutral-100 text-neutral-600"
+        status === "active" ? "bg-corisio-100 text-corisio-blue" : "bg-neutral-100 text-neutral-600"
       }`}
     >
       {ACTIVE_STATUS_LABELS[status]}

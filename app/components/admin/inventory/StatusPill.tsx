@@ -1,10 +1,10 @@
 import type { CategoryStatus, ProductStatus, StockStatus } from "@/redux/types";
 
 const STOCK_STYLES: Record<StockStatus, { label: string; className: string }> = {
-  IN_STOCK: { label: "In Stock", className: "bg-[#e7f4e4] text-corisio-blue" },
+  IN_STOCK: { label: "In Stock", className: "bg-corisio-100 text-corisio-blue" },
   LOW_STOCK: { label: "Low Stock", className: "bg-[#fdf0da] text-amber-700" },
   OUT_OF_STOCK: { label: "Out of Stock", className: "bg-[#fbe9e9] text-red-600" },
-  ACTIVE: { label: "ACTIVE", className: "bg-[#e7f4e4] text-corisio-blue" },
+  ACTIVE: { label: "ACTIVE", className: "bg-corisio-100 text-corisio-blue" },
   INACTIVE: { label: "INACTIVE", className: "bg-[#fbe9e9] text-red-600" },
   DRAFT: { label: "DRAFT", className: "bg-neutral-100 text-neutral-600" },
 };
@@ -20,7 +20,7 @@ export function StockStatusPill({ status }: { status: StockStatus }) {
 }
 
 const PRODUCT_STYLES: Record<ProductStatus, { label: string; className: string }> = {
-  ACTIVE: { label: "Active", className: "bg-[#e7f4e4] text-corisio-blue" },
+  ACTIVE: { label: "Active", className: "bg-corisio-100 text-corisio-blue" },
   INACTIVE: { label: "Inactive", className: "bg-neutral-100 text-neutral-600" },
   DRAFT: { label: "Draft", className: "bg-[#fdf0da] text-amber-700" },
 };

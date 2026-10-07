@@ -62,7 +62,7 @@ export const DELIVERY_TYPE_STYLES: Record<
 export const DELIVERY_STATUS_STYLES: Record<AdminDeliveryStatus, string> = {
   scheduled: "bg-white/70 text-neutral-600",
   out_for_delivery: "bg-[#e6effb] text-blue-700",
-  delivered: "bg-[#e7f4e4] text-corisio-blue",
+  delivered: "bg-corisio-100 text-corisio-blue",
   missed: "bg-[#fbe9e9] text-red-600",
   skipped: "bg-neutral-100 text-neutral-600",
 };

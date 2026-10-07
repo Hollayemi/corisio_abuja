@@ -30,7 +30,7 @@ function fmtKm(km: number): string {
 function OpenBadge({ store }: { store: Store }) {
   const open = isOpenNow(store);
   return (
-    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${open ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"}`}>
+    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${open ? "bg-corisio-100merald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"}`}>
       {open ? "Open" : "Closed"}
     </span>
   );

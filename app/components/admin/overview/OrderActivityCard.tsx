@@ -87,7 +87,7 @@ export default function OrderActivityCard({ week }: { week: AdminOverviewWeek })
                   }`}
                 >
                   <motion.div
-                    className="w-full rounded-full bg-[#4a7c3a]"
+                    className="w-full rounded-full bg-corisio-500"
                     style={{ minHeight: !isFuture && day.orders > 0 ? 22 : 0 }}
                     initial={{ height: "0%" }}
                     animate={{ height: `${pct}%` }}

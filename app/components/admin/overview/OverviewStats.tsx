@@ -31,7 +31,7 @@ function Stat({
           <span
             aria-hidden="true"
             className={`flex size-4 items-center justify-center rounded-full text-[10px] ${
-              change.trend === "down" ? "bg-red-100 text-red-600" : "bg-emerald-100 text-emerald-600"
+              change.trend === "down" ? "bg-red-100 text-red-600" : "bg-corisio-100merald-100 text-emerald-600"
             }`}
           >
             {change.trend === "down" ? "↓" : "↑"}

@@ -17,7 +17,7 @@ export type AvatarProps = {
 export function Avatar({ name, src, className = "size-10" }: AvatarProps) {
   return (
     <span
-      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-corisio-900 text-xs font-semibold text-corisio-blue ${className}`}
+      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-corisio-100 text-xs font-semibold text-corisio-blue ${className}`}
     >
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -52,7 +52,7 @@ export function Switch({ checked, onChange, label, disabled }: SwitchProps) {
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={`relative h-8 w-14 shrink-0 rounded-lg p-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue disabled:cursor-not-allowed disabled:opacity-60 ${
-        checked ? "bg-[#1e5314]" : "bg-[#dedcd8]"
+        checked ? "bg-corisio-500" : "bg-[#dedcd8]"
       }`}
     >
       <span
@@ -82,7 +82,7 @@ export function CheckToggle({ checked, onChange, label }: CheckToggleProps) {
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={`flex h-9 w-[52px] items-center justify-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue ${
-        checked ? "bg-[#1e5314] text-white" : "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
+        checked ? "bg-corisio-500 text-white" : "bg-neutral-200 text-neutral-600 hover:bg-neutral-300"
       }`}
     >
       <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">

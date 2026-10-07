@@ -7,6 +7,7 @@ import { NotificationsTab } from "@/app/components/admin/settings/NotificationsT
 import { ProfileTab } from "@/app/components/admin/settings/ProfileTab";
 import { SecurityTab } from "@/app/components/admin/settings/SecurityTab";
 import { SettingsNav, type SettingsTab } from "@/app/components/admin/settings/SettingsNav";
+import { StoreProfileSection } from "@/app/components/admin/settings/StoreProfileSection";
 import { TeamTab } from "@/app/components/admin/settings/TeamTab";
 
 export type SettingsClientProps = {
@@ -35,7 +36,12 @@ export default function SettingsClient({ initialTab }: SettingsClientProps) {
 
         <div className="min-w-0">
           {tab === "general" && <GeneralTab />}
-          {tab === "profile" && <ProfileTab />}
+          {tab === "profile" && (
+            <>
+              <ProfileTab />
+              <StoreProfileSection />
+            </>
+          )}
           {tab === "security" && <SecurityTab />}
           {tab === "notifications" && <NotificationsTab />}
           {tab === "team" && <TeamTab />}

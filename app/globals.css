@@ -6,13 +6,19 @@
 }
 
 @theme {
-  --color-corisio-900: #4D0E1B;
-  --color-corisio-800: #5C1420;
-  --color-corisio-700: #6B1220;
-  --color-corisio-600: #82212D;
-  --color-corisio-500: #2C337C;
-  --color-corisio-400:   #C46478;
-  --color-corisio-100:   #FBEFF1;
+  --color-corisio-50:  #EEF0F9;
+  --color-corisio-100: #D9DDF0;
+  --color-corisio-200: #B4BBE1;
+  --color-corisio-300: #8D97D0;
+  --color-corisio-400: #5C69A9;
+  --color-corisio-500: #2C337C; /* base */
+  --color-corisio-600: #252B69;
+  --color-corisio-700: #1E2355;
+  --color-corisio-800: #171B42;
+  --color-corisio-900: #10132E;
+
+  --color-rose-400:   #C46478;
+  --color-rose-100:   #FBEFF1;
   --color-gold:       #C9922A;
   --color-gold-light: #E8B04A;
   --color-navy:       #121824;
@@ -26,14 +32,16 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-   --corisio-900: var(--color-corisio-900);
+  --corisio-900: var(--color-corisio-900);
   --corisio-800: var(--color-corisio-800);
   --corisio-700: var(--color-corisio-700);
   --corisio-600: var(--color-corisio-600);
   --corisio-500: var(--color-corisio-500);
-  --corisio-500: var(--color-corisio-500);
-  --corisio-500: var(--color-corisio-500);
-  --corisio-500: var(--color-corisio-500);
+  --corisio-400: var(--color-corisio-400);
+  --corisio-300: var(--color-corisio-300);
+  --corisio-200: var(--color-corisio-200);
+  --corisio-100: var(--color-corisio-100);
+  --corisio-50: var(--color-corisio-50);
 
   /* Luxol brand colors (estimated from the design; swap in exact hex values) */
   --color-corisio-blue: #2C337C;

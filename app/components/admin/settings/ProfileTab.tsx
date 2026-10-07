@@ -266,7 +266,7 @@ function ProfileForm({ profile, roles }: { profile: AdminProfile; roles: AdminSe
                 type="button"
                 onClick={handleSave}
                 disabled={!dirty || !valid || saving}
-                className="h-12 rounded-xl bg-[#4a7c3a] px-6 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-12 rounded-xl bg-corisio-500 px-6 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save changes"}
               </button>

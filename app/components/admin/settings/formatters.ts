@@ -46,7 +46,7 @@ export const TEAM_STATUS_LABELS: Record<AdminTeamStatus, string> = {
 };
 
 export const TEAM_STATUS_STYLES: Record<AdminTeamStatus, string> = {
-  active: "bg-[#e7f4e4] text-corisio-blue",
+  active: "bg-corisio-100 text-corisio-blue",
   invited: "bg-[#fdf0dc] text-amber-700",
   suspended: "bg-[#fbe9e9] text-red-600",
 };

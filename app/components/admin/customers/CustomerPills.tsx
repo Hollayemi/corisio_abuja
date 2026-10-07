@@ -10,7 +10,7 @@ import {
 } from "./formatters";
 
 const CUSTOMER_STYLES: Record<AdminCustomerStatus, string> = {
-  active: "bg-[#e7f4e4] text-corisio-blue",
+  active: "bg-corisio-100 text-corisio-blue",
   inactive: "bg-[#fbe9e9] text-red-600",
   suspended: "bg-[#fdf0da] text-amber-700",
 };
@@ -29,7 +29,7 @@ export function CustomerStatusPill({ status }: CustomerStatusPillProps) {
 }
 
 const MEMBERSHIP_STYLES: Record<AdminMembershipStatus, { pill: string; dot: string }> = {
-  active: { pill: "bg-[#e7f4e4] text-corisio-blue", dot: "bg-corisio-blue" },
+  active: { pill: "bg-corisio-100 text-corisio-blue", dot: "bg-corisio-blue" },
   paused: { pill: "bg-[#fdf0da] text-amber-700", dot: "bg-amber-600" },
   cancelled: { pill: "bg-[#fbe9e9] text-red-600", dot: "bg-red-600" },
   expired: { pill: "bg-neutral-100 text-neutral-600", dot: "bg-neutral-500" },

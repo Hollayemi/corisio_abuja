@@ -1,31 +1,12 @@
-/**
- * Global notifications (toasts).
- *
- * Call from anywhere on the client: components, event handlers, RTK Query
- * callbacks, plain functions. No hook and no provider needed:
- *
- *   notify.success("Welcome, Ayobami", "You're signed in.");
- *   notify.error("Couldn't save", "Check your connection and try again.");
- *   notify.info("Signed out");
- *   notify.warning("Session expiring", { message: "Save your work.", duration: 10_000 });
- *   notify.success("Saved", { id: "product-save" });   // same id replaces the previous toast
- *   notify.dismiss(id);  notify.clear();
- *
- * <NotificationHost /> (mounted once in AppProviders) renders them.
- * Calling notify on the server does nothing.
- */
 
 export type NotifyType = "success" | "error" | "warning" | "info";
 
 export type Notification = {
-  /** Unique per toast instance (used as the React key) */
   key: string;
-  /** Public id: pass your own to replace/dedupe, or use the one notify returns */
   id: string;
   type: NotifyType;
   title: string;
   message?: string;
-  /** Milliseconds before it closes itself. 0 = stays until dismissed. */
   duration: number;
   closing: boolean;
 };
@@ -68,10 +49,6 @@ export const getServerNotifications = () => EMPTY;
 export function removeNotification(key: string) {
   set(state.filter((n) => n.key !== key));
 }
-
-/* ------------------------------------------------------------------ */
-/* Public API                                                          */
-/* ------------------------------------------------------------------ */
 
 function dismiss(id: string) {
   if (!state.some((n) => n.id === id && !n.closing)) return;

@@ -34,7 +34,7 @@ export default function AdminAuthShell({
 
       <main className="mx-auto mt-10 grid w-full max-w-6xl flex-1 content-center items-center gap-10 lg:mt-0 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-24">
         <section>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#dcefd6] px-3 py-1.5 text-xs font-medium text-corisio-blue">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-corisio-100 px-3 py-1.5 text-xs font-medium text-corisio-blue">
             <span aria-hidden="true" className="size-1 rounded-full bg-current" />
             {pill}
           </span>

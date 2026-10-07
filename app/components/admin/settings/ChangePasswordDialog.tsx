@@ -86,7 +86,7 @@ export function ChangePasswordDialog({ close }: ChangePasswordDialogProps) {
       <button
         type="submit"
         disabled={isLoading}
-        className="h-14 w-full rounded-xl bg-[#1e5314] text-base font-medium text-white transition hover:brightness-110 disabled:cursor-wait disabled:opacity-70"
+        className="h-14 w-full rounded-xl bg-corisio-500 text-base font-medium text-white transition hover:brightness-110 disabled:cursor-wait disabled:opacity-70"
       >
         {isLoading ? "Changing..." : "Change"}
       </button>

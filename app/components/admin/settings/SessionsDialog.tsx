@@ -89,7 +89,7 @@ export function SessionsDialog({ close }: SessionsDialogProps) {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-base font-medium text-neutral-900">{session.device}</p>
                       {session.isCurrent && (
-                        <span className="inline-flex items-center gap-1.5 rounded-md bg-[#e7f4e4] px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-corisio-blue">
+                        <span className="inline-flex items-center gap-1.5 rounded-md bg-corisio-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-corisio-blue">
                           <span aria-hidden="true" className="size-1.5 rounded-full bg-corisio-blue" />
                           This device
                         </span>

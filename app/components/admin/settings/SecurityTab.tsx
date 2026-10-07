@@ -81,7 +81,7 @@ export function SecurityTab() {
                 width: "lg",
               })
             }
-            className="h-12 shrink-0 rounded-xl bg-[#4a7c3a] px-6 text-sm font-medium text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue"
+            className="h-12 shrink-0 rounded-xl bg-corisio-500 px-6 text-sm font-medium text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue"
           >
             Change Password
           </button>

@@ -1,7 +1,7 @@
 import type { PromotionStatus } from "@/redux/types";
 
 const STYLES: Record<PromotionStatus, { label: string; className: string }> = {
-  ACTIVE: { label: "ACTIVE", className: "bg-[#e7f4e4] text-corisio-blue" },
+  ACTIVE: { label: "ACTIVE", className: "bg-corisio-100 text-corisio-blue" },
   SCHEDULED: { label: "SCHEDULED", className: "bg-[#fdf0da] text-amber-700" },
   INACTIVE: { label: "INACTIVE", className: "bg-neutral-100 text-neutral-600" },
   EXPIRED: { label: "EXPIRED", className: "bg-neutral-200 text-neutral-600" },

@@ -48,7 +48,7 @@ export function InviteUserDialog({ close }: InviteUserDialogProps) {
             type="button"
             onClick={handleSend}
             disabled={!valid || isLoading}
-            className="inline-flex h-12 items-center gap-2 rounded-xl bg-[#4a7c3a] px-5 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-12 items-center gap-2 rounded-xl bg-corisio-500 px-5 text-sm font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinejoin="round" aria-hidden="true">
               <path d="M21 3L3 10.5l7 3 3 7z" />

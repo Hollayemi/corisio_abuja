@@ -195,7 +195,11 @@ export function ImageUploadField({
 
   // Rebuild previews from the current File[] value
   useEffect(() => {
-    const urls = value.map((file) => URL.createObjectURL(file));
+    if (!Array.isArray(value) || value.length === 0) {
+      setPreviews([]);
+      return;
+    }
+    const urls = value.map((file) => URL.createObjectURL(file)) || [];
     setPreviews(urls);
     return () => urls.forEach((url) => URL.revokeObjectURL(url));
   }, [value]);
@@ -238,7 +242,7 @@ export function ImageUploadField({
           onClick={() => inputRef.current?.click()}
           className="flex w-full items-center gap-4 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-4 text-left transition hover:border-corisio-blue hover:bg-white"
         >
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-[#dcefd6]">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-corisio-100">
             <AdminIcon name="upload" className="size-5 text-corisio-blue" />
           </div>
           <div className="min-w-0 flex-1">
@@ -249,7 +253,7 @@ export function ImageUploadField({
             </p>
             <p className={hintClass}>{hint}</p>
           </div>
-          <span className="rounded-md bg-[#dcefd6] px-3 py-1 text-xs font-medium text-corisio-blue">
+          <span className="rounded-md bg-corisio-100 px-3 py-1 text-xs font-medium text-corisio-blue">
             Choose
           </span>
         </button>

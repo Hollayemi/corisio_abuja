@@ -145,7 +145,7 @@ export function TeamTab() {
         <button
           type="button"
           onClick={openInvite}
-          className="inline-flex h-12 items-center gap-2 rounded-xl bg-[#4a7c3a] px-5 text-sm font-medium text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue"
+          className="inline-flex h-12 items-center gap-2 rounded-xl bg-corisio-500 px-5 text-sm font-medium text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue"
         >
           <AdminIcon name="plus" className="size-4" />
           Add New User

@@ -32,7 +32,7 @@ function Avatar({ user }: { user: AdminUser }) {
   return (
     <span
       aria-hidden="true"
-      className="flex size-[37px] shrink-0 items-center justify-center rounded-full bg-[#dcefd6] text-sm font-semibold text-corisio-blue"
+      className="flex size-[37px] shrink-0 items-center justify-center rounded-full bg-corisio-100 text-sm font-semibold text-corisio-blue"
     >
       {initial}
     </span>

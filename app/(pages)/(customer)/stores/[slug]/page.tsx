@@ -75,7 +75,7 @@ export default async function StorePage({ params }: { params: Params }) {
 
         <aside className="h-fit rounded-2xl border border-neutral-200 bg-white p-5 lg:sticky lg:top-48">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className={`rounded-full px-2.5 py-1 font-medium ${open ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"}`}>{open ? "Open now" : "Closed"}</span>
+            <span className={`rounded-full px-2.5 py-1 font-medium ${open ? "bg-corisio-100merald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"}`}>{open ? "Open now" : "Closed"}</span>
             <span className="rounded-full bg-corisio-yellow/15 px-2.5 py-1 font-medium text-neutral-700">★ {store.rating} ({store.reviews} reviews)</span>
           </div>
           <dl className="mt-5 space-y-4 text-sm">

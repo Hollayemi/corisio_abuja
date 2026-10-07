@@ -97,7 +97,7 @@ export function SettingsNav({ value, onChange }: SettingsNavProps) {
                 aria-current={active ? "page" : undefined}
                 className={`flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-left text-sm transition focus-visible:outline-2 focus-visible:outline-corisio-blue ${
                   active
-                    ? "bg-[#e7f4e4] font-medium text-corisio-blue"
+                    ? "bg-corisio-100 font-medium text-corisio-blue"
                     : "text-neutral-700 hover:bg-neutral-50"
                 }`}
               >

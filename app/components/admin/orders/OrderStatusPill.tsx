@@ -14,7 +14,7 @@ const STATUS_STYLES: Record<AdminOrderStatus, string> = {
   PENDING: "bg-neutral-100 text-neutral-600",
   PROCESSING: "bg-[#fdf0da] text-amber-700",
   OUT_FOR_DELIVERY: "bg-[#e6effb] text-blue-700",
-  DELIVERED: "bg-[#e7f4e4] text-corisio-blue",
+  DELIVERED: "bg-corisio-100 text-corisio-blue",
   CANCELLED: "bg-[#fbe9e9] text-red-600",
 };
 
@@ -52,7 +52,7 @@ export function OrderStatusGroupPill({ status }: OrderStatusGroupPillProps) {
 
 const PAYMENT_STYLES: Record<AdminOrderPaymentStatus, string> = {
   PENDING: "bg-[#fdf0da] text-amber-700",
-  SUCCESS: "bg-[#e7f4e4] text-corisio-blue",
+  SUCCESS: "bg-corisio-100 text-corisio-blue",
   FAILED: "bg-[#fbe9e9] text-red-600",
   REFUNDED: "bg-neutral-100 text-neutral-600",
 };
