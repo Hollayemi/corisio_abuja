@@ -24,6 +24,9 @@ export const API_ROUTES = {
     products: "/catalog/products",
     product: (slug: string) => `/catalog/products/${slug}`,
     related: (slug: string) => `/catalog/products/${slug}/related`,
+    /** Public stores for the map. Nearest first when the request carries X-User-Lat / X-User-Lng. */
+    stores: "/catalog/stores",
+    store: (slug: string) => `/catalog/stores/${slug}`,
   },
   inventory: {
     create: "/admin/inventory",

@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useMemo, useRef } from "react";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
-import { ABUJA_CENTER } from "@/app/data/stores";
+import { ABUJA_CENTER } from "@/app/utils/geo";
 
 const pinIcon = L.divIcon({
   className: "",
@@ -13,10 +13,20 @@ const pinIcon = L.divIcon({
   html: `<svg width="34" height="44" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg"><path d="M17 0C7.6 0 0 7.4 0 16.6 0 29 17 44 17 44s17-15 17-27.4C34 7.4 26.4 0 17 0z" fill="#2C337C"/><circle cx="17" cy="16.5" r="6.5" fill="#FCB415"/></svg>`,
 });
 
-function ClickToPlace({ onChange, disabled }: { onChange: (lat: number, lng: number) => void; disabled?: boolean }) {
+function ClickToPlace({
+  onChange,
+  disabled,
+}: {
+  onChange: (lat: number, lng: number) => void;
+  disabled?: boolean;
+}) {
   useMapEvents({
     click(e) {
-      if (!disabled) onChange(e.latlng.lat, e.latlng.lng);
+      if (disabled) return;
+      const { lat, lng } = e.latlng;
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        onChange(lat, lng);
+      }
     },
   });
   return null;
@@ -51,6 +61,29 @@ function WheelGuard() {
   return null;
 }
 
+/**
+ * Forces Leaflet to recalculate its container size.
+ * Needed whenever the map mounts inside a dialog, a scroll container, or any
+ * layout that changes after mount — otherwise clicks land on a 0×0 canvas.
+ */
+function InvalidateOnMount() {
+  const map = useMap();
+  useEffect(() => {
+    // Initial pass, after the dialog animation settles.
+    const id = window.setTimeout(() => map.invalidateSize(), 100);
+
+    // React to any container size change (dialog resize, scrollbar, orientation).
+    const ro = new ResizeObserver(() => map.invalidateSize());
+    ro.observe(map.getContainer());
+
+    return () => {
+      window.clearTimeout(id);
+      ro.disconnect();
+    };
+  }, [map]);
+  return null;
+}
+
 export type LocationPickerMapProps = {
   latitude: number | null;
   longitude: number | null;
@@ -59,7 +92,12 @@ export type LocationPickerMapProps = {
 };
 
 /** Click the map or drag the pin to set where the store is. */
-export default function LocationPickerMap({ latitude, longitude, onChange, disabled }: LocationPickerMapProps) {
+export default function LocationPickerMap({
+  latitude,
+  longitude,
+  onChange,
+  disabled,
+}: LocationPickerMapProps) {
   const position = useMemo<[number, number] | null>(
     () => (latitude !== null && longitude !== null ? [latitude, longitude] : null),
     [latitude, longitude],
@@ -74,8 +112,10 @@ export default function LocationPickerMap({ latitude, longitude, onChange, disab
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        referrerPolicy="strict-origin-when-cross-origin"
       />
+      <InvalidateOnMount />
       <WheelGuard />
       <ClickToPlace onChange={onChange} disabled={disabled} />
       <KeepInView position={position} />
@@ -88,7 +128,9 @@ export default function LocationPickerMap({ latitude, longitude, onChange, disab
           eventHandlers={{
             dragend() {
               const p = markerRef.current?.getLatLng();
-              if (p) onChange(p.lat, p.lng);
+              if (p && Number.isFinite(p.lat) && Number.isFinite(p.lng)) {
+                onChange(p.lat, p.lng);
+              }
             },
           }}
         />

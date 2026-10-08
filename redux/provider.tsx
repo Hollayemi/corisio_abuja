@@ -3,6 +3,14 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Provider } from "react-redux";
 import { useAuth } from "@/lib/auth/hooks";
+import {
+  locationAgeMs,
+  locationPermission,
+  readLocation,
+  requestLocation,
+  subscribeLocation,
+  type UserLocation,
+} from "@/lib/location/store";
 import { useAppDispatch, useAppStore } from "./hooks";
 import baseApi from "./slices/baseApi";
 import { cartApi, useGetServerCartQuery, useSyncCartMutation } from "./slices/cartApi";
@@ -286,6 +294,51 @@ function CartAutoSync() {
 }
 
 
+/** Lists that come back in a different order or with different distances when the visitor moves. */
+const LOCATION_TAGS = ["Stores", "Product", "Category"] as const;
+
+/** A location confirmed more recently than this isn't re-checked on page load. */
+const LOCATION_FRESH_MS = 30 * 60 * 1000;
+
+const locationKey = (l: UserLocation | null) => (l ? `${l.latitude},${l.longitude}` : "none");
+
+/**
+ * Keeps the visitor's location and the API's answers in step.
+ *
+ *  - Every request already carries the location (axiosBaseQuery). But RTK Query
+ *    caches by arguments, not headers, so when the location changes the lists that
+ *    depend on it are marked stale and anything on screen refetches.
+ *  - On page load, if the browser already allows location (no pop-up needed) and
+ *    the saved one is old, it is quietly refreshed. It never opens the permission
+ *    pop-up by itself: that only happens when someone asks (the map's locate button).
+ */
+function LocationSync() {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    let last = locationKey(readLocation());
+    return subscribeLocation(() => {
+      const next = locationKey(readLocation());
+      if (next === last) return;
+      last = next;
+      dispatch(baseApi.util.invalidateTags([...LOCATION_TAGS]));
+    });
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (locationAgeMs() < LOCATION_FRESH_MS) return;
+    let cancelled = false;
+    locationPermission().then((state) => {
+      if (!cancelled && state === "granted") void requestLocation();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return null;
+}
+
 /** Wraps the app in the Redux store; AuthSync below keeps the cart in step with sign in / out. */
 export default function ReduxProvider({ children }: { children: ReactNode }) {
   const [store] = useState<AppStore>(makeStore);
@@ -296,6 +349,7 @@ export default function ReduxProvider({ children }: { children: ReactNode }) {
       <AuthSync />
       <ServerCartSync />
       <CartAutoSync />
+      <LocationSync />
       {children}
     </Provider>
   );

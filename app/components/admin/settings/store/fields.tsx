@@ -3,12 +3,23 @@
 import type { ReactNode } from "react";
 import type { DayKey, OpeningHours } from "@/redux/types";
 
+/* fields.tsx */
+
 export const inputClass =
-  "h-14 w-full rounded-xl border border-neutral-300 bg-white px-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-corisio-blue focus:outline-none focus:ring-2 focus:ring-corisio-blue/20 disabled:bg-neutral-50 disabled:text-neutral-500";
+  "h-12 w-full rounded-xl border border-neutral-300 bg-white px-4 text-sm text-neutral-900 placeholder:text-neutral-400 transition focus:border-corisio-blue focus:outline-none focus:ring-4 focus:ring-corisio-blue/10 disabled:cursor-not-allowed disabled:bg-neutral-50 disabled:text-neutral-500";
 
 export const textareaClass =
-  "w-full resize-none rounded-xl border border-transparent bg-neutral-100 px-4 py-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-corisio-blue focus:bg-white focus:outline-none focus:ring-2 focus:ring-corisio-blue/20 disabled:text-neutral-500";
+  "w-full resize-y rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 transition focus:border-corisio-blue focus:outline-none focus:ring-4 focus:ring-corisio-blue/10 disabled:bg-neutral-50 disabled:text-neutral-500";
 
+export const selectClass = inputClass + " appearance-none bg-[url('data:image/svg+xml;...')] bg-[length:16px] bg-[right_14px_center] bg-no-repeat pr-10";
+
+/* Button variants — use these everywhere */
+export const btn = {
+  primary: "inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-corisio-blue px-5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue disabled:cursor-not-allowed disabled:opacity-50",
+  secondary: "inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-neutral-300 bg-white px-5 text-sm font-semibold text-neutral-800 transition hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue disabled:cursor-not-allowed disabled:opacity-50",
+  ghostDanger: "rounded font-semibold text-red-600 transition hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 disabled:opacity-50",
+  ghost: "rounded font-semibold text-corisio-blue transition hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue disabled:opacity-50",
+};
 /** Label on the left, field on the right (same layout as the personal profile form). */
 export function Row({
   label,
@@ -24,14 +35,17 @@ export function Row({
   children: ReactNode;
 }) {
   return (
-    <div className="grid gap-2 sm:grid-cols-[minmax(0,200px)_minmax(0,1fr)] sm:gap-8">
-      <label htmlFor={htmlFor} className="pt-0 text-base font-semibold text-neutral-900 sm:pt-4">
+    <div className="grid gap-1.5 sm:grid-cols-[minmax(0,200px)_minmax(0,1fr)] sm:gap-8">
+      <label
+        htmlFor={htmlFor}
+        className="text-sm font-semibold text-neutral-700 sm:pt-3 sm:text-base sm:text-neutral-900"
+      >
         {label}
       </label>
-      <div className="max-w-[730px]">
+      <div className="sm:max-w-[640px]">
         {children}
         {error ? (
-          <p role="alert" className="mt-1.5 text-xs text-red-600">
+          <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">
             {error}
           </p>
         ) : (
@@ -46,8 +60,8 @@ export function Row({
 export function CardHeading({ title, description }: { title: string; description?: string }) {
   return (
     <div className="border-b border-neutral-200 pb-5">
-      <h2 className="text-xl font-bold text-neutral-900">{title}</h2>
-      {description && <p className="mt-1 text-sm text-neutral-500">{description}</p>}
+      <h2 className="text-[16px] font-bold text-neutral-900">{title}</h2>
+      {description && <p className="mt-1 text-xs text-neutral-500">{description}</p>}
     </div>
   );
 }

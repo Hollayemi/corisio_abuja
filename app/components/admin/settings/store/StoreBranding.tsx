@@ -6,7 +6,7 @@ import { getErrorMessage } from "@/redux/config/errors";
 import { useRemoveStoreMediaMutation, useUploadStoreMediaMutation } from "@/redux/slices/storeProfileApi";
 import type { StoreMediaKind, StoreProfile } from "@/redux/types";
 import { Avatar, SettingsCard } from "../Controls";
-import { CardHeading } from "./fields";
+import { btn, CardHeading } from "./fields";
 
 const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 const LIMITS: Record<StoreMediaKind, { bytes: number; label: string }> = {
@@ -62,69 +62,122 @@ export function StoreBranding({ profile, canEdit }: { profile: StoreProfile; can
   const linkButton =
     "rounded font-semibold text-corisio-blue hover:underline focus-visible:outline-2 focus-visible:outline-corisio-blue disabled:opacity-50";
 
+  // Inside StoreBranding, replace the return with:
+
   return (
     <SettingsCard className="p-6 sm:p-8">
       <CardHeading title="Logo & cover photo" description="Shoppers see these on the stores map and on your store page." />
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-12">
         <div className="space-y-8">
           {/* Logo */}
-          <div className="flex flex-wrap items-center gap-6">
-            <Avatar name={profile.name} src={profile.logo} className="size-24 text-2xl" />
-            <div>
-              <p className="text-base font-semibold text-neutral-900">Logo</p>
-              <p className="mt-1 text-sm text-neutral-500">Square, at least 256 x 256. PNG, JPG or WebP (max 2MB).</p>
-              {canEdit && (
-                <p className="mt-2 flex items-center gap-4 text-sm">
-                  <button type="button" disabled={busy !== null} onClick={() => refs.logo.current?.click()} className={linkButton}>
-                    {busy === "logo" ? "Uploading..." : profile.logo ? "Change logo" : "Upload logo"}
-                  </button>
-                  {profile.logo && (
-                    <button type="button" disabled={busy !== null} onClick={() => handleRemove("logo")} className="rounded font-semibold text-red-600 hover:underline disabled:opacity-50">
-                      Remove
-                    </button>
-                  )}
-                </p>
-              )}
-              {errors.logo && (
-                <p role="alert" className="mt-1 text-xs text-red-600">
-                  {errors.logo}
-                </p>
-              )}
-            </div>
-          </div>
+         {/* Logo */}
+{/* Logo */}
+<div className="flex items-start gap-4 sm:gap-6">
+  {/* Avatar doubles as the upload target when editable */}
+  <button
+    type="button"
+    disabled={!canEdit || busy !== null}
+    onClick={() => refs.logo.current?.click()}
+    className="group relative size-16 shrink-0 overflow-hidden rounded-full ring-1 ring-neutral-200 transition hover:ring-2 hover:ring-corisio-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue disabled:cursor-default disabled:hover:ring-1 disabled:hover:ring-neutral-200 sm:size-24"
+    aria-label={profile.logo ? "Change logo" : "Upload logo"}
+  >
+    <Avatar
+      name={profile.name}
+      src={profile.logo}
+      className="size-full text-base sm:text-2xl"
+    />
+
+    {canEdit && busy !== "logo" && (
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 flex items-center justify-center bg-neutral-900/0 text-[10px] font-semibold text-white opacity-0 transition group-hover:bg-neutral-900/50 group-hover:opacity-100 group-focus-visible:bg-neutral-900/50 group-focus-visible:opacity-100 sm:text-[11px]"
+      >
+        {profile.logo ? "Change" : "Upload"}
+      </span>
+    )}
+
+    {busy === "logo" && (
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 flex items-center justify-center bg-neutral-900/60 text-[10px] font-semibold text-white sm:text-[11px]"
+      >
+        …
+      </span>
+    )}
+  </button>
+
+  <div className="min-w-0 flex-1">
+    <p className="text-sm font-semibold text-neutral-900">Logo</p>
+
+    {canEdit && (
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <button
+          type="button"
+          disabled={busy !== null}
+          onClick={() => refs.logo.current?.click()}
+          className={btn.ghost + " text-xs sm:text-sm"}
+        >
+          {busy === "logo" ? "Uploading…" : profile.logo ? "Change" : "Upload"}
+        </button>
+
+        {profile.logo && (
+          <>
+            <span aria-hidden="true" className="text-neutral-300">·</span>
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => handleRemove("logo")}
+              className={btn.ghostDanger + " text-xs sm:text-sm"}
+            >
+              Remove
+            </button>
+          </>
+        )}
+      </div>
+    )}
+
+    <p className="mt-1.5 text-xs text-neutral-500">
+      Square, at least 256 × 256.
+      <span className="hidden sm:inline"> PNG, JPG or WebP (max 2MB).</span>
+    </p>
+
+    {errors.logo && (
+      <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">
+        {errors.logo}
+      </p>
+    )}
+  </div>
+</div>
 
           {/* Cover photo */}
           <div>
             <p className="text-base font-semibold text-neutral-900">Cover photo</p>
-            <p className="mt-1 text-sm text-neutral-500">
-              Wide photo of your shop front or products, about 1200 x 600. PNG, JPG or WebP (max 5MB).
-            </p>
-            <div className="mt-3 aspect-[2/1] w-full max-w-[560px] overflow-hidden rounded-2xl border border-dashed border-neutral-300 bg-neutral-50">
+            <p className="mt-0.5 text-xs text-neutral-500">Wide photo of your shop front or products, about 1200 × 600. PNG, JPG or WebP (max 5MB).</p>
+            <div className="mt-3 aspect-[2/1] w-full overflow-hidden rounded-2xl border border-dashed border-neutral-300 bg-neutral-50">
               {profile.banner ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={profile.banner} alt="Store cover" className="size-full object-cover" />
               ) : (
-                <div className="flex size-full items-center justify-center text-sm text-neutral-400">No cover photo yet</div>
+                <div className="flex size-full flex-col items-center justify-center gap-1 text-sm text-neutral-400">
+                  <span>No cover photo yet</span>
+                  <span className="text-xs">A good cover shows your shop front or best products.</span>
+                </div>
               )}
             </div>
             {canEdit && (
-              <p className="mt-3 flex items-center gap-4 text-sm">
-                <button type="button" disabled={busy !== null} onClick={() => refs.banner.current?.click()} className={linkButton}>
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
+                <button type="button" disabled={busy !== null} onClick={() => refs.banner.current?.click()} className={btn.ghost}>
                   {busy === "banner" ? "Uploading..." : profile.banner ? "Change cover photo" : "Upload cover photo"}
                 </button>
                 {profile.banner && (
-                  <button type="button" disabled={busy !== null} onClick={() => handleRemove("banner")} className="rounded font-semibold text-red-600 hover:underline disabled:opacity-50">
+                  <button type="button" disabled={busy !== null} onClick={() => handleRemove("banner")} className={btn.ghostDanger}>
                     Remove
                   </button>
                 )}
-              </p>
+              </div>
             )}
-            {errors.banner && (
-              <p role="alert" className="mt-1 text-xs text-red-600">
-                {errors.banner}
-              </p>
-            )}
+            {errors.banner && <p role="alert" className="mt-1.5 text-xs font-medium text-red-600">{errors.banner}</p>}
           </div>
 
           {(["logo", "banner"] as const).map((kind) => (
@@ -143,7 +196,10 @@ export function StoreBranding({ profile, canEdit }: { profile: StoreProfile; can
           ))}
         </div>
 
-        <MapCardPreview profile={profile} />
+        {/* Preview — sticky on desktop */}
+        <div className="lg:sticky lg:top-6 lg:self-start">
+          <MapCardPreview profile={profile} />
+        </div>
       </div>
     </SettingsCard>
   );
@@ -152,9 +208,10 @@ export function StoreBranding({ profile, canEdit }: { profile: StoreProfile; can
 /** A small copy of the stores map card, so owners can see what their photos and tagline do. */
 function MapCardPreview({ profile }: { profile: StoreProfile }) {
   return (
-    <div>
-      <p className="text-sm font-semibold text-neutral-900">How shoppers see you on the map</p>
-      <div className="mt-3 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+    <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+      <p className="text-sm font-semibold text-neutral-900">Map card preview</p>
+      <p className="mt-0.5 text-xs text-neutral-500">How shoppers see you on the stores map.</p>
+      <div className="mt-3 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
         <div className="h-28 bg-neutral-100">
           {profile.banner && (
             // eslint-disable-next-line @next/next/no-img-element

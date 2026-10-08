@@ -3,6 +3,7 @@ import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import { clearToken, readToken } from "@/lib/auth/token";
 import { isApiFailure, isApiSuccess, toApiError } from "./errors";
 import type { ApiError, ApiSuccess } from "../types";
+import { locationHeaders } from "@/lib/location/store";
 
 export const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -13,10 +14,18 @@ export const axiosInstance = axios.create({
 
 // Every request (RTK Query and the React Query auth hooks) carries the signed-in
 // user's token, read from the auth cookie at send time.
+//
+// It also carries the visitor's location (X-User-Lat / X-User-Lng) when we know it,
+// so the backend can put the closest stores and products first without every
+// endpoint having to take coordinates. See lib/location/store.ts.
 axiosInstance.interceptors.request.use((config) => {
   const token = readToken();
   if (token && !config.headers.Authorization) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  for (const [name, value] of Object.entries(locationHeaders())) {
+    if (!config.headers.has(name)) config.headers.set(name, value);
   }
   return config;
 });

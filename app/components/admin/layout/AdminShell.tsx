@@ -73,7 +73,7 @@ export default function AdminShell({
 
         <main
           id="admin-main"
-          className="min-w-0 flex-1 overflow-y-auto bg-[#f4f7fc] p-5 sm:p-9"
+          className="min-w-0 flex-1 overflow-y-auto bg-[#f4f7fc] p-2 sm:p-9"
         >
           {children}
         </main>

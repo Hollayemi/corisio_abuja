@@ -49,8 +49,6 @@ export const siteConfig = {
    */
   nav: [
     { label: "Home", href: "/" },
-    { label: "Stores", href: "/stores" },
-    { label: "Products", href: "/products" },
     { label: "How It Works", href: "/how-it-works" },
     { label: "For Businesses", href: "/business" },
   ] satisfies NavItem[],

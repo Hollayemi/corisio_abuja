@@ -98,7 +98,10 @@ export type ListStorefrontProductsParams = {
   availability?: string[];
   /** lowercase variant names, e.g. "small" */
   sizes?: string[];
-  sort?: "featured" | "price-asc" | "price-desc" | "name-asc";
+  /** "nearest" puts products from the closest stores first (needs the visitor's location) */
+  sort?: "featured" | "price-asc" | "price-desc" | "name-asc" | "nearest";
+  /** Only this store's products (store slug) */
+  store?: string;
   page?: number;
   perPage?: number;
 };

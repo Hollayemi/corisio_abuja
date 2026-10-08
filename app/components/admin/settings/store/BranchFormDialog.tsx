@@ -18,7 +18,6 @@ const toDraft = (b?: StoreBranch): LocationDraft => ({
   longitude: b ? String(b.longitude) : "",
 });
 
-/** Add or edit a branch (StoreAddress). Opened with useDialog(). */
 export function BranchFormDialog({
   storeId,
   branch,
@@ -26,9 +25,7 @@ export function BranchFormDialog({
   close,
 }: {
   storeId: string;
-  /** Omit to add a new branch */
   branch?: StoreBranch;
-  /** The store's first branch is always the default */
   isFirst: boolean;
   close: () => void;
 }) {
@@ -45,7 +42,6 @@ export function BranchFormDialog({
   async function handleSave() {
     if (!valid || loading) return;
     setError("");
-
     const body = {
       label: draft.label.trim(),
       address: draft.address.trim(),
@@ -56,7 +52,6 @@ export function BranchFormDialog({
       longitude: lng,
       isDefault,
     };
-
     try {
       if (branch) {
         await updateBranch({ storeId, id: branch.id, ...body }).unwrap();
@@ -83,27 +78,36 @@ export function BranchFormDialog({
         }
       />
 
-      <div className="max-h-[calc(90dvh-73px)] overflow-y-auto px-6 py-6 sm:px-8">
-        <LocationFields value={draft} onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))} />
+      {/* flex-1 min-h-0 handles the height, no magic number */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 sm:px-8 sm:py-6">
+        <LocationFields
+          value={draft}
+          onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))}
+        />
 
-        <label className="mt-6 flex items-start gap-3 text-sm text-neutral-700">
+        <label className="mt-6 flex items-start gap-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 p-4 text-sm">
           <input
             type="checkbox"
             checked={isDefault}
             disabled={isFirst || branch?.isDefault}
             onChange={(e) => setIsDefault(e.target.checked)}
-            className="mt-0.5 size-4 accent-corisio-500"
+            className="mt-0.5 size-4 accent-corisio-blue"
           />
           <span>
             <span className="font-semibold text-neutral-900">Default branch</span>
             <span className="block text-xs text-neutral-500">
               Shown first to shoppers. To switch the default, tick this on the branch you want.
             </span>
+            {isFirst && (
+              <span className="mt-1 block text-xs font-medium text-corisio-blue">
+                The first branch is always the default.
+              </span>
+            )}
           </span>
         </label>
 
         {error && (
-          <p role="alert" className="mt-4 text-sm text-red-600">
+          <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
             {error}
           </p>
         )}
