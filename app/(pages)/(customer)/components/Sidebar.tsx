@@ -33,7 +33,7 @@ export default function Sidebar({
 
   return (
     <div>
-      <h1 className="text-lg font-bold text-neutral-900">Manage Your Subscription</h1>
+      <h1 className="text-lg font-bold text-neutral-900">Manage Your Profile</h1>
 
       <nav aria-label="Account" className="mt-5 flex flex-col gap-3">
         {ACCOUNT_NAV.map((item) => (

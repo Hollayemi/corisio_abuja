@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import AccountButton, { HeaderIconLink } from "@/app/components/ui/AccountButton";
+import AccountButton from "@/app/components/ui/AccountButton";
 import useOpenAuth from "@/app/components/auth/useOpenAuth";
 import useOpenCart from "@/app/components/cart/useOpenCart";
 import { useAuth } from "@/lib/auth/hooks";
@@ -103,7 +103,7 @@ function NavLinks({
   const items = signedIn
     ? [
         { label: "Nearby", href: "/nearby" },
-        { label: "Saved Stores", href: "/saved" },
+        // { label: "Saved Stores", href: "/saved" },
         { label: "My Orders", href: "/orders" },
         ...siteConfig.nav.filter((i) => i.href !== "/"),
       ]
@@ -243,8 +243,8 @@ export default function Header() {
             <div className="flex items-center gap-2.5 lg:justify-self-end">
               {signedIn && (
                 <>
-                  <HeaderIconLink href="/wishlist" label="Wishlist" icon="heart" />
-                  <HeaderIconLink href="/loyalty" label="Loyalty points" icon="gem" />
+                  {/* <HeaderIconLink href="/wishlist" label="Wishlist" icon="heart" />
+                  <HeaderIconLink href="/loyalty" label="Loyalty points" icon="gem" /> */}
                   <div className="hidden sm:block">
                     <AccountButton />
                   </div>
@@ -316,7 +316,7 @@ export default function Header() {
                 onNavigate={closeMenu}
                 signedIn={signedIn}
               />
-              {signedIn && (
+              {/* {signedIn && (
                 <div className="flex items-center gap-5 border-t border-white/15 pt-4">
                   <HeaderIconLink
                     href="/wishlist"
@@ -331,7 +331,7 @@ export default function Header() {
                     onClick={closeMenu}
                   />
                 </div>
-              )}
+              )} */}
               <div className="flex items-center justify-between border-t border-white/15 pt-4">
                 {flashSales}
                 <AccountButton size="sm" onAction={closeMenu} />

@@ -13,11 +13,14 @@ import {
 
 const PAGE_SIZE = 24;
 
-const SORTS = [
-  { value: "featured", label: "Featured" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "name-asc", label: "Name: A to Z" },
+export const SORTS = [
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+  { value: "name_asc", label: "Name: A to Z" },
+  { value: "best-selling", label: "Best sellers" },
+  { value: "newest", label: "Newest" },
+  { value: "trending", label: "Trending" },
+  { value: "nearest", label: "Nearest stores" },
 ] as const;
 
 type SortValue = (typeof SORTS)[number]["value"];
@@ -38,7 +41,7 @@ function buildHref(state: State, patch: Partial<State> = {}) {
 
   if (next.category !== "all") params.set("category", next.category);
   if (next.q) params.set("q", next.q);
-  if (next.sort !== "featured") params.set("sort", next.sort);
+  if (next.sort !== "nearest") params.set("sort", next.sort);
   if (next.view !== "grid") params.set("view", next.view);
   if (next.page > 1) params.set("page", String(next.page));
 
@@ -69,7 +72,7 @@ export default function ShopClient() {
   const category = searchParams.get("category") ?? "all";
   const q = (searchParams.get("q") ?? "").trim().slice(0, 80);
   const sort: SortValue =
-    SORTS.find((s) => s.value === searchParams.get("sort"))?.value ?? "featured";
+    SORTS.find((s) => s.value === searchParams.get("sort"))?.value ?? "nearest";
   const view: ViewMode = searchParams.get("view") === "list" ? "list" : "grid";
   const requestedPage = Math.max(
     1,

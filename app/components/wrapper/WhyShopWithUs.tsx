@@ -1,20 +1,23 @@
-import { DeliveryIcon, PriceIcon, QualityIcon } from "../ui/icons";
+import { LocationPinIcon, PriceIcon, StoreIcon } from "../ui/icons";
 
 const benefits = [
   {
-    title: "Best Quality",
-    description: "We deliver only the freshest and finest products.",
-    Icon: QualityIcon,
+    title: "Find it nearby",
+    description:
+      "Search for any product and see which stores close to you have it, right on the map.",
+    Icon: LocationPinIcon,
   },
   {
-    title: "Fast Delivery",
-    description: "Lightning fast delivery at your doorstep on time.",
-    Icon: DeliveryIcon,
-  },
-  {
-    title: "Affordable Prices",
-    description: "Best prices & exclusive offers on all your favorite products.",
+    title: "Know before you go",
+    description:
+      "See prices, opening hours and distance up front, so every trip is worth making.",
     Icon: PriceIcon,
+  },
+  {
+    title: "Support local stores",
+    description:
+      "Shop from trusted stores in your neighbourhood and keep your money in your community.",
+    Icon: StoreIcon,
   },
 ];
 
@@ -29,12 +32,15 @@ export default function WhyShopWithUs() {
           id="why-shop-heading"
           className="text-xl font-semibold text-corisio-blue sm:text-2xl"
         >
-          Why Shop With Us
+          Why Use Corisio
         </h2>
         <span
           aria-hidden="true"
           className="mx-auto mt-2 block h-0.5 w-14 rounded-full bg-corisio-yellow"
         />
+        <p className="mx-auto mt-3 max-w-[460px] text-sm text-neutral-600">
+          Corisio connects you to physical stores around you, so what you need is never far away.
+        </p>
       </div>
 
       <ul className="mt-8 grid gap-8 rounded-2xl bg-[#f8f1e6] px-6 py-8 sm:grid-cols-3 sm:justify-items-center sm:px-10 sm:py-10">

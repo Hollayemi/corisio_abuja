@@ -3,21 +3,20 @@
 import ProductSection from "./ProductSection";
 import { useListStorefrontProductsQuery } from "@/redux/slices/catalogApi";
 
-export default function DealOfTheDay() {
+export default function BestSellers() {
   const { data, isLoading } = useListStorefrontProductsQuery({
-    tag: "deal-of-the-day",
+    sort: "best-selling",
     perPage: 6,
   });
 
   return (
     <ProductSection
-      id="deal-of-the-day"
-      title="🔥 Deals of the Day"
-      viewAllHref="/offers"
-      viewAllLabel="View all deals →"
+      id="best-sellers"
+      title="🛒 Best Sellers"
+      viewAllHref="/shop?sort=best-selling"
+      viewAllLabel="View all best sellers →"
       products={data?.data.items ?? []}
       isLoading={isLoading}
-      emptyMessage="No deals right now — check back soon."
     />
   );
 }

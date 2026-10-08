@@ -80,6 +80,8 @@ export type ListPublicStoresParams = {
   category?: string;
   /** Only stores with a location within this many km of the visitor (needs their location) */
   radiusKm?: number;
+  /** "nearest" (default when a location is sent) | "popular" (most orders first) | "rating" */
+  sort?: "nearest" | "popular" | "rating";
   /** Default 100 */
   limit?: number;
 };

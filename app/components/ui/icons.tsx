@@ -349,3 +349,19 @@ export const socialIcons = {
   linkedin: LinkedInIcon,
   mail: MailIcon,
 } as const;
+
+export const LocationPinIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
+    <circle cx="12" cy="10" r="3" />
+  </Svg>
+);
+
+export const StoreIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M3 9 4.5 4h15L21 9" />
+    <path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" />
+    <path d="M5 12v8h14v-8" />
+    <path d="M10 20v-5h4v5" />
+  </Svg>
+);

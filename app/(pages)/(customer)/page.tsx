@@ -1,17 +1,32 @@
-import Hero from "@/app/components/Sections/Hero";
-import Categories from "@/app/components/ui/Categories";
-import { DealOfTheDay, FreshProducts, MainFeatures, PromoBanners, ShopMore } from "@/app/components/Sections";
+import {
+  BestSellers,
+  Categories,
+  DealOfTheDay,
+  Hero,
+  LandingCTA,
+  NewOnCorisio,
+  PopularNearYou,
+  StoresNearYou,
+  TrendingNow,
+} from "@/app/components/Sections";
 
+/**
+ * Landing page order:
+ * Hero (with search) → Categories → Deals of the Day → Popular Near You →
+ * Stores Near You → Best Sellers → New on Corisio → Trending Now → CTA
+ */
 export default function Home() {
   return (
-    <div className="">
+    <div>
       <Hero />
       <Categories />
-      <PromoBanners />
       <DealOfTheDay />
-      <FreshProducts />
-      <MainFeatures />
-      <ShopMore />
+      <PopularNearYou />
+      <StoresNearYou />
+      <BestSellers />
+      <NewOnCorisio />
+      <TrendingNow />
+      <LandingCTA />
     </div>
   );
 }

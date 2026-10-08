@@ -47,7 +47,7 @@ export default function SupportHelpPanel() {
           </span>
         </a>
 
-        <a href="mailto:hello@luxol.com" className={CARD}>
+        <a href={`mailto:${siteConfig.email}`} className={CARD}>
           <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-corisio-blue/10 text-corisio-blue">
             <MailIcon className="size-5" />
           </span>
@@ -56,7 +56,7 @@ export default function SupportHelpPanel() {
               Email support
             </span>
             <span className="mt-1 block text-sm text-neutral-500">
-              hello@luxol.com
+              {siteConfig.email}
             </span>
           </span>
         </a>

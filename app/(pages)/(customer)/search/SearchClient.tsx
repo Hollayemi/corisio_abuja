@@ -15,6 +15,7 @@ import {
   useGetCategoriesQuery,
   useListStorefrontProductsQuery,
 } from "@/redux/slices/catalogApi";
+import { SORTS } from "../shop/ShopClient";
 
 const PAGE_SIZE = 20;
 const container = "mx-auto w-full max-w-[1240px] px-4 sm:px-6";
@@ -25,12 +26,6 @@ const container = "mx-auto w-full max-w-[1240px] px-4 sm:px-6";
 
 type Option = { value: string; label: string };
 
-const SORTS = [
-  { value: "featured", label: "Relevance" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "name-asc", label: "Name: A to Z" },
-] as const;
 
 type SortValue = (typeof SORTS)[number]["value"];
 
@@ -94,7 +89,7 @@ function buildHref(state: State, patch: Partial<State> = {}) {
   next.types.forEach((v) => params.append("type", v));
   next.availability.forEach((v) => params.append("availability", v));
   next.sizes.forEach((v) => params.append("size", v));
-  if (next.sort !== "featured") params.set("sort", next.sort);
+  if (next.sort !== "nearest") params.set("sort", next.sort);
   if (next.view !== "grid") params.set("view", next.view);
   if (next.page > 1) params.set("page", String(next.page));
 
@@ -238,7 +233,7 @@ function FiltersForm({
   return (
     <form action="/search" method="get">
       {state.q && <input type="hidden" name="q" value={state.q} />}
-      {state.sort !== "featured" && (
+      {state.sort !== "nearest" && (
         <input type="hidden" name="sort" value={state.sort} />
       )}
       {state.view !== "grid" && (
@@ -328,7 +323,7 @@ export default function SearchClient() {
   const availability = onlyKnown(searchParams.getAll("availability"), AVAILABILITY_OPTIONS);
   const sizes = onlyKnown(searchParams.getAll("size"), SIZE_OPTIONS);
   const sort: SortValue =
-    SORTS.find((s) => s.value === searchParams.get("sort"))?.value ?? "featured";
+    SORTS.find((s) => s.value === searchParams.get("sort"))?.value ?? "nearest";
   const view: ViewMode = searchParams.get("view") === "list" ? "list" : "grid";
   const requestedPage = Math.max(
     1,

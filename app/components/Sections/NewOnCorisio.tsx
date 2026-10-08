@@ -3,21 +3,20 @@
 import ProductSection from "./ProductSection";
 import { useListStorefrontProductsQuery } from "@/redux/slices/catalogApi";
 
-export default function DealOfTheDay() {
+export default function NewOnCorisio() {
   const { data, isLoading } = useListStorefrontProductsQuery({
-    tag: "deal-of-the-day",
+    sort: "newest",
     perPage: 6,
   });
 
   return (
     <ProductSection
-      id="deal-of-the-day"
-      title="🔥 Deals of the Day"
-      viewAllHref="/offers"
-      viewAllLabel="View all deals →"
+      id="new-on-corisio"
+      title="🆕 New on Corisio"
+      viewAllHref="/shop?sort=newest"
+      viewAllLabel="See what's new →"
       products={data?.data.items ?? []}
       isLoading={isLoading}
-      emptyMessage="No deals right now — check back soon."
     />
   );
 }

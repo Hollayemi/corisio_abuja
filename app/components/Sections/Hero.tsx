@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { EASE } from "../ui/motion";
+import HeroSearch from "./HeroSearch";
 
 
 const SLIDES = [
@@ -129,7 +130,11 @@ export default function Hero() {
             </motion.div>
           </AnimatePresence>
 
-          <motion.div variants={variants} className="mt-9 flex flex-wrap gap-3">
+          <motion.div variants={variants}>
+            <HeroSearch />
+          </motion.div>
+
+          <motion.div variants={variants} className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/search"
               className="inline-flex h-11 items-center rounded-lg bg-corisio-blue px-6 text-sm font-medium text-white transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-corisio-blue"

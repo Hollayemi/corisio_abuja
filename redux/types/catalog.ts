@@ -99,7 +99,12 @@ export type ListStorefrontProductsParams = {
   /** lowercase variant names, e.g. "small" */
   sizes?: string[];
   /** "nearest" puts products from the closest stores first (needs the visitor's location) */
-  sort?: "featured" | "price-asc" | "price-desc" | "name-asc" | "nearest";
+  sort?: "newest" | "price_asc" | "price_desc" | "name_asc" | "best-selling" | "trending" | "nearest"
+   
+  /** Only products from stores with a location within this many km of the visitor (needs their location) */
+  radiusKm?: number;
+  /** Only products with an active promotion */
+  onSale?: boolean;
   /** Only this store's products (store slug) */
   store?: string;
   page?: number;

@@ -6,7 +6,7 @@ export type NavItem = {
 export const siteConfig = {
   name: "Corisio",
   logo: "/logo-hw.png",
-
+  email: "support@corisio.com",
   phone: "+234 814 770 2684",
   address: "Abuja, Nigeria",
 

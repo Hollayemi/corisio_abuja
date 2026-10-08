@@ -5,13 +5,6 @@ import type { ApiSuccess, StorefrontProduct } from "@/redux/types";
 
 type Params = Promise<{ slug: string }>;
 
-/**
- * Server-side only, and only for the page <title>/description — the actual
- * product data used for rendering and cart actions is fetched client-side
- * via RTK Query in ProductClient (same as every other storefront page:
- * ShopClient, SearchClient, the home sections), so it stays in sync with
- * the cart/auth state and doesn't need a second data-fetching path.
- */
 async function fetchProductMeta(slug: string): Promise<StorefrontProduct | null> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!baseUrl) return null;
