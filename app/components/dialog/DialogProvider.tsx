@@ -37,9 +37,12 @@ export type DialogContent =
   | ((api: { close: () => void }) => ReactNode);
 
 type DialogContextValue = {
-  openDialog: (content: DialogContent, options?: DialogOptions) => void;
+  /** Returns the new dialog's id, so a caller can tell later whether it is still the one on screen. */
+  openDialog: (content: DialogContent, options?: DialogOptions) => number;
   closeDialog: () => void;
   isOpen: boolean;
+  /** Id of the dialog on screen (the one openDialog returned), or null when none is. */
+  activeId: number | null;
 };
 
 type ActiveDialog = {
@@ -204,8 +207,10 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   const openDialog = useCallback(
     (content: DialogContent, options: DialogOptions = {}) => {
       nextId.current += 1;
+      const id = nextId.current;
       setClosing(false);
-      setDialog({ id: nextId.current, content, options });
+      setDialog({ id, content, options });
+      return id;
     },
     [],
   );
@@ -222,6 +227,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
       openDialog,
       closeDialog,
       isOpen: dialog !== null && !closing,
+      activeId: dialog !== null && !closing ? dialog.id : null,
     }),
     [openDialog, closeDialog, dialog, closing],
   );

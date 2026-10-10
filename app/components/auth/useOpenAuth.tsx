@@ -16,14 +16,20 @@ const TITLES: Record<AuthView, string> = {
  * Returns openAuth(view, options) which opens the auth dialog on "login",
  * "register" or "forgot". openAuth("register", { accountType: STORE_OWNER })
  * opens the register form with "I own a store" already picked.
+ * `notice` is a line shown above the login form ("Please sign in to continue").
+ * Returns the dialog's id (see useDialog().activeId).
  */
 export default function useOpenAuth() {
   const { openDialog } = useDialog();
 
   return useCallback(
-    (view: AuthView = "login", options?: { accountType?: SignupAccountType }) =>
+    (view: AuthView = "login", options?: { accountType?: SignupAccountType; notice?: string }) =>
       openDialog(
-        <AuthDialog initialView={view} initialAccountType={options?.accountType} />,
+        <AuthDialog
+          initialView={view}
+          initialAccountType={options?.accountType}
+          notice={options?.notice}
+        />,
         {
           title: TITLES[view],
           side: "right",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import UnauthorizedPrompt from "@/app/components/auth/UnauthorizedPrompt";
 import { DialogProvider } from "@/app/components/dialog/DialogProvider";
 import NotificationHost from "@/app/components/notifications/NotificationHost";
 import { notify } from "@/lib/notify";
@@ -61,6 +62,7 @@ function CartEvents() {
  *   ReduxProvider    store (RTK Query + cart); also keeps the cart in step with the auth state
  *   DialogProvider   dialogs render CartDrawer/AuthDialog, which use Redux + auth
  *
+ * <UnauthorizedPrompt /> opens the sign-in dialog when any API call answers 401.
  * <NotificationHost /> renders whatever notify.success()/error()/... sends (app/lib/notify.ts).
  */
 export default function AppProviders({ children }: { children: ReactNode }) {
@@ -69,6 +71,7 @@ export default function AppProviders({ children }: { children: ReactNode }) {
       <DialogProvider>
         {children}
         <CartEvents />
+        <UnauthorizedPrompt />
         <NotificationHost />
       </DialogProvider>
     </ReduxProvider>

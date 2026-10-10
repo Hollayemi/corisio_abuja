@@ -1,6 +1,7 @@
-import axios, { type AxiosRequestConfig } from "axios";
+import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from "axios";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import { clearToken, readToken } from "@/lib/auth/token";
+import { reportUnauthorized } from "@/lib/auth/unauthorized";
 import { isApiFailure, isApiSuccess, toApiError } from "./errors";
 import type { ApiError, ApiSuccess } from "../types";
 import { locationHeaders } from "@/lib/location/store";
@@ -30,17 +31,28 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// A 401 on a request that carried a token means it expired or was revoked:
-// drop it, and the auth state flips to signed out everywhere.
+// A 401 means "sign in first" (no token) or "your session ran out" (the token was
+// rejected). Either way: drop a rejected token so the app flips to signed out, and tell
+// the sign-in prompt (lib/auth/unauthorized.ts) so it can open the login dialog.
+//
+// The backend sends 401 as a real HTTP status, but its error body also carries the code
+// (errorDetails.statusCode), so both are checked.
+function handleUnauthorized(config: InternalAxiosRequestConfig | undefined) {
+  const hadToken = !!config?.headers?.has("Authorization");
+  if (hadToken) clearToken();
+  reportUnauthorized({ url: config?.url, method: config?.method, hadToken });
+}
+
+const is401Body = (body: unknown) => isApiFailure(body) && body.errorDetails.statusCode === 401;
+
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (is401Body(response.data)) handleUnauthorized(response.config);
+    return response;
+  },
   (error: unknown) => {
-    if (
-      axios.isAxiosError(error) &&
-      error.response?.status === 401 &&
-      error.config?.headers?.Authorization
-    ) {
-      clearToken();
+    if (axios.isAxiosError(error) && (error.response?.status === 401 || is401Body(error.response?.data))) {
+      handleUnauthorized(error.config);
     }
     return Promise.reject(error);
   },

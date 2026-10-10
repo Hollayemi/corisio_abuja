@@ -42,10 +42,13 @@ export type AuthView = "login" | "register" | "forgot" | "welcome";
 export default function AuthDialog({
   initialView = "login",
   initialAccountType = SignupAccountType.CUSTOMER,
+  notice,
 }: {
   initialView?: AuthView;
   /** Which "I'm signing up as" option starts selected on the register form. */
   initialAccountType?: SignupAccountType;
+  /** Why the dialog opened, shown above the login form. */
+  notice?: string;
 }) {
   const { closeDialog } = useDialog();
   const router = useRouter();
@@ -84,6 +87,15 @@ export default function AuthDialog({
           height={64}
           className="mx-auto h-16 w-auto"
         />
+      )}
+
+      {view === "login" && notice && (
+        <p
+          role="status"
+          className="mt-6 rounded-lg bg-[#fdf3e3] px-4 py-3 text-center text-sm text-neutral-800"
+        >
+          {notice}
+        </p>
       )}
 
       {view === "login" && (
