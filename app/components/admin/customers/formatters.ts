@@ -1,6 +1,5 @@
 import type {
   AdminCustomerStatus,
-  AdminMembershipStatus,
   AdminOrderPaymentStatus,
   AdminOrderType,
 } from "@/redux/types";
@@ -15,17 +14,9 @@ export const CUSTOMER_STATUS_FILTER_OPTIONS = (
   Object.keys(CUSTOMER_STATUS_LABELS) as AdminCustomerStatus[]
 ).map((value) => ({ value, label: CUSTOMER_STATUS_LABELS[value] }));
 
-export const MEMBERSHIP_STATUS_LABELS: Record<AdminMembershipStatus, string> = {
-  active: "Active",
-  paused: "Paused",
-  cancelled: "Canceled",
-  expired: "Expired",
-};
-
 /** The Type column in the customer's Order History. */
 export const ORDER_TYPE_LABELS: Record<AdminOrderType, string> = {
   SHOP: "SHOP",
-  FREEZER_PLANNER: "Freezer Planner",
 };
 
 /** The Payment column in Order History says "Paid" where the order drawer says "Success". */
@@ -36,7 +27,6 @@ export const HISTORY_PAYMENT_LABELS: Record<AdminOrderPaymentStatus, string> = {
   REFUNDED: "Refunded",
 };
 
-export const INTERVAL_LABELS = { week: "week", month: "month", year: "year" } as const;
 
 function toDate(iso?: string | null) {
   if (!iso) return null;

@@ -7,13 +7,12 @@ import { Pagination } from "@/app/components/admin/Pagination";
 import { StatCard, StatCardRow } from "@/app/components/admin/StatCard";
 import { formatCount, getStatChange, csvCell, formatOrderDateTime, ORDER_STATUS_LABELS } from "@/app/components/admin/orders/formatters";
 import { OrderTable, OrderTableSkeleton } from "@/app/components/admin/orders/OrderTable";
-import { OrderTabs } from "@/app/components/admin/orders/OrderTabs";
 import { PeriodSelect, StatusFilterSelect } from "@/app/components/admin/orders/OrderSelects";
 import AdminIcon from "@/app/components/admin/layout/AdminIcon";
 import { notify } from "@/lib/notify";
 import { getErrorMessage } from "@/redux/config/errors";
 import { useGetAdminOrderStatsQuery, useListAdminOrdersQuery } from "@/redux/slices/adminOrdersApi";
-import type { AdminOrderPeriod, AdminOrderStat, AdminOrderStatus, AdminOrderType } from "@/redux/types";
+import type { AdminOrderPeriod, AdminOrderStat, AdminOrderStatus } from "@/redux/types";
 
 const DEFAULT_PER_PAGE = 8;
 /** Orders come in all day: refresh the table and numbers while the tab is in view. */
@@ -30,7 +29,6 @@ function useDebouncedValue<T>(value: T, delayMs: number) {
 }
 
 export default function OrdersClient() {
-  const [type, setType] = useState<AdminOrderType>("SHOP");
   const [period, setPeriod] = useState<AdminOrderPeriod>("this_month");
   const [status, setStatus] = useState<AdminOrderStatus | "">("");
   const [search, setSearch] = useState("");
@@ -38,10 +36,9 @@ export default function OrdersClient() {
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const debouncedSearch = useDebouncedValue(search.trim(), 350);
 
-  const stats = useGetAdminOrderStatsQuery({ period, type }, POLL_OPTIONS);
+  const stats = useGetAdminOrderStatsQuery({ period }, POLL_OPTIONS);
   const orders = useListAdminOrdersQuery(
     {
-      type,
       period,
       status: status || undefined,
       search: debouncedSearch || undefined,
@@ -99,7 +96,7 @@ export default function OrdersClient() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `luxol-${type}-orders-page-${page}.csv`;
+    link.download = `luxol-orders-page-${page}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     notify.success("Export started", { message: "This page's orders were downloaded as a CSV." });
@@ -123,7 +120,6 @@ export default function OrdersClient() {
 
       <div className="rounded-2xl border border-neutral-100 bg-white p-5 sm:p-6">
         <AdminToolbar
-          leading={<OrderTabs value={type} onChange={resetPage(setType)} counts={s?.tabCounts} />}
           search={search}
           onSearchChange={resetPage(setSearch)}
           extra={<StatusFilterSelect value={status} onChange={resetPage(setStatus)} />}

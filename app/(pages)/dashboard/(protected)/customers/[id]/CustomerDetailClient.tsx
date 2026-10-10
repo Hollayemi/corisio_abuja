@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { CustomerHeader } from "@/app/components/admin/customers/CustomerHeader";
-import { CustomerMembershipCard } from "@/app/components/admin/customers/CustomerMembershipCard";
 import { CustomerOrderHistory } from "@/app/components/admin/customers/CustomerOrderHistory";
 import { CustomerActivityList, CustomerPersonalInfo } from "@/app/components/admin/customers/CustomerInfoPanels";
 import { CustomerSummaryCards } from "@/app/components/admin/customers/CustomerSummaryCards";
@@ -51,7 +50,6 @@ export default function CustomerDetailClient({ id }: CustomerDetailClientProps) 
       <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="min-w-0 space-y-8">
           <CustomerOrderHistory customerId={customer.id} customerName={customer.fullName} />
-          {customer.membership && <CustomerMembershipCard membership={customer.membership} />}
         </div>
 
         <div className="space-y-6">

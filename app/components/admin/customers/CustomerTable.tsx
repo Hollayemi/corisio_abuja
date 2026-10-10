@@ -14,7 +14,6 @@ const COLUMNS = [
   "Number",
   "Orders",
   "Total Spent",
-  "Membership",
   "Last Order",
   "Status",
 ];
@@ -50,7 +49,6 @@ function CustomerRow({ customer, onOpen }: CustomerRowProps) {
       <td className="py-4 pr-4 text-sm text-neutral-900">{customer.phone}</td>
       <td className="py-4 pr-4 text-sm text-neutral-500">{customer.ordersCount}</td>
       <td className="py-4 pr-4 text-sm text-neutral-500">{formatNaira(customer.totalSpent)}</td>
-      <td className="py-4 pr-4 text-sm text-neutral-500">{customer.membership ?? "—"}</td>
       <td className="py-4 pr-4 text-sm text-neutral-900">{formatDate(customer.lastOrderAt)}</td>
       <td className="py-4">
         <CustomerStatusPill status={customer.status} />

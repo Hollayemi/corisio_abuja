@@ -14,8 +14,7 @@ import type {
 import baseApi from "./baseApi";
 
 /**
- * Membership (subscription), customer side. Same data staff manage in
- * adminMembershipApi.ts, so nothing on /subscription is hard-coded.
+ * Membership (subscription), customer side. Nothing on /subscription is hard-coded.
  *
  *  Catalogue (public)
  *  ── GET  /membership/plans                     listMembershipPlans   (active plans only)

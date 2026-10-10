@@ -7,14 +7,10 @@ import type { AdminAttentionItem, AdminAttentionKind, AdminAttentionStatus } fro
 
 const KIND_LABELS: Record<AdminAttentionKind, string> = {
   SHOP: "Order",
-  FREEZER_PLANNER: "Freezer Planner",
-  MEMBERSHIP: "Membership",
 };
 
 const KIND_HREFS: Record<AdminAttentionKind, string> = {
   SHOP: "/dashboard/orders",
-  FREEZER_PLANNER: "/dashboard/orders",
-  MEMBERSHIP: "/dashboard/membership",
 };
 
 const STATUS_LABELS: Record<AdminAttentionStatus, string> = {

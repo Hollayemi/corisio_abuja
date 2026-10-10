@@ -25,20 +25,10 @@ export const adminNav = {
     { label: "Promotions", href: "/dashboard/promotions", icon: "promotions" },
     { label: "Delivery & Schedule", href: "/dashboard/delivery", icon: "delivery" },
     { label: "Analytics", href: "/dashboard/analytics", icon: "analytics" },
-    { label: "Membership", href: "/dashboard/membership", icon: "membership" },
-  ],
-  features: [
-    {
-      label: "Freezer Planner",
-      href: "/freezer-planner",
-      icon: "freezerPlanner",
-      external: true,
-    },
   ],
   settings: { label: "Settings", href: "/dashboard/settings", icon: "settings" },
 } satisfies {
   core: AdminNavItem[];
-  features: AdminNavItem[];
   settings: AdminNavItem;
 };
 

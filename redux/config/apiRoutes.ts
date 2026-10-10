@@ -82,14 +82,6 @@ export const API_ROUTES = {
     summary: "/admin/overview",
     topProducts: "/admin/overview/top-products",
   },
-  adminMembership: {
-    stats: "/admin/membership/stats",
-    plans: "/admin/membership/plans",
-    plan: (id: string) => `/admin/membership/plans/${id}`,
-    subscribers: "/admin/membership/subscribers",
-    proteins: "/admin/membership/proteins",
-    protein: (id: string) => `/admin/membership/proteins/${id}`,
-  },
   orders: {
     create: "/orders",
     list: "/orders",

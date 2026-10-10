@@ -1,12 +1,10 @@
 import type {
   AdminCustomerStatus,
-  AdminMembershipStatus,
   AdminOrderPaymentStatus,
 } from "@/redux/types";
 import {
   CUSTOMER_STATUS_LABELS,
   HISTORY_PAYMENT_LABELS,
-  MEMBERSHIP_STATUS_LABELS,
 } from "./formatters";
 
 const CUSTOMER_STYLES: Record<AdminCustomerStatus, string> = {
@@ -28,28 +26,6 @@ export function CustomerStatusPill({ status }: CustomerStatusPillProps) {
   );
 }
 
-const MEMBERSHIP_STYLES: Record<AdminMembershipStatus, { pill: string; dot: string }> = {
-  active: { pill: "bg-corisio-100 text-corisio-blue", dot: "bg-corisio-blue" },
-  paused: { pill: "bg-[#fdf0da] text-amber-700", dot: "bg-amber-600" },
-  cancelled: { pill: "bg-[#fbe9e9] text-red-600", dot: "bg-red-600" },
-  expired: { pill: "bg-neutral-100 text-neutral-600", dot: "bg-neutral-500" },
-};
-
-export type MembershipStatusPillProps = {
-  status: AdminMembershipStatus;
-  /** Adds the leading dot ("• Active"), as in the Membership card header. */
-  withDot?: boolean;
-};
-
-export function MembershipStatusPill({ status, withDot }: MembershipStatusPillProps) {
-  const s = MEMBERSHIP_STYLES[status];
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium ${s.pill}`}>
-      {withDot && <span aria-hidden="true" className={`size-1.5 rounded-full ${s.dot}`} />}
-      {MEMBERSHIP_STATUS_LABELS[status]}
-    </span>
-  );
-}
 
 export type HistoryPaymentPillProps = { status: AdminOrderPaymentStatus };
 

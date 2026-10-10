@@ -20,7 +20,6 @@ import {
   DELIVERY_STATUS_LABELS,
   DELIVERY_STATUS_OPTIONS,
   DELIVERY_TYPE_LABELS,
-  DELIVERY_TYPE_OPTIONS,
   formatTimeRange,
 } from "@/app/components/admin/deliveries/formatters";
 import { csvCell } from "@/app/components/admin/orders/formatters";
@@ -30,7 +29,7 @@ import {
   useGetAdminDeliveryCalendarQuery,
   useLazyListAdminDeliveriesQuery,
 } from "@/redux/slices/adminDeliveriesApi";
-import type { AdminDeliveryStatus, AdminDeliveryType } from "@/redux/types/adminDeliveries";
+import type { AdminDeliveryStatus } from "@/redux/types/adminDeliveries";
 
 const EXPORT_LIMIT = 500;
 
@@ -43,7 +42,6 @@ function defaultSelection(month: string) {
 export default function DeliveryClient() {
   const [month, setMonth] = useState(() => startOfMonthKey(todayKey()));
   const [selected, setSelected] = useState(() => todayKey());
-  const [type, setType] = useState<AdminDeliveryType | "">("");
   const [status, setStatus] = useState<AdminDeliveryStatus | "">("");
 
   const grid = monthGrid(month);
@@ -51,7 +49,6 @@ export default function DeliveryClient() {
     {
       from: grid[0],
       to: grid[grid.length - 1],
-      type: type || undefined,
       status: status || undefined,
     },
     { pollingInterval: 60_000, skipPollingIfUnfocused: true },
@@ -73,8 +70,7 @@ export default function DeliveryClient() {
         {
           from: startOfMonthKey(month),
           to: endOfMonthKey(month),
-          type: type || undefined,
-          status: status || undefined,
+              status: status || undefined,
           page: 1,
           perPage: EXPORT_LIMIT,
         },
@@ -145,13 +141,6 @@ export default function DeliveryClient() {
 
         <div className="flex flex-wrap items-center gap-3">
           <FilterSelect
-            ariaLabel="Filter by delivery type"
-            allLabel="All types"
-            value={type}
-            onChange={setType}
-            options={DELIVERY_TYPE_OPTIONS}
-          />
-          <FilterSelect
             ariaLabel="Filter by delivery status"
             allLabel="All statuses"
             value={status}
@@ -187,7 +176,7 @@ export default function DeliveryClient() {
           onSelect={setSelected}
           loading={calendarLoading}
         />
-        <DeliveryDayPanel date={selected} type={type || undefined} status={status || undefined} />
+        <DeliveryDayPanel date={selected} status={status || undefined} />
       </div>
     </div>
   );

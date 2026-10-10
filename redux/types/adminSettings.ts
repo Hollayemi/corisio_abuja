@@ -119,7 +119,7 @@ export type AdminNotificationItem = {
   push: boolean;
 };
 
-/** One card: "Orders & deliveries", "Inventory", "Memberships"... */
+/** One card: "Orders & deliveries", "Inventory"... */
 export type AdminNotificationGroup = {
   id: string;
   title: string;

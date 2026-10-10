@@ -38,7 +38,7 @@ export type AdminOverviewWeek = {
 };
 
 /* ------------------------------------------------------------------ */
-/* The four numbers beside it                                          */
+/* The three numbers beside it                                          */
 /* ------------------------------------------------------------------ */
 
 /** Each carries a count or % change against last month ("+23 this month"). */
@@ -47,28 +47,11 @@ export type AdminOverviewStats = {
   /** NGN. */
   totalSales: AdminOrderStat;
   activeCustomers: AdminOrderStat;
-  activeMemberships: AdminOrderStat;
 };
 
 /* ------------------------------------------------------------------ */
-/* The service cards                                                   */
+/* The inventory card                                                  */
 /* ------------------------------------------------------------------ */
-
-export type AdminOverviewFreezerPlanner = {
-  activeOrders: number;
-  processing: number;
-  recurring: number;
-  nextDeliveryWindow: string | null;
-};
-
-export type AdminOverviewMembership = {
-  activeMembers: number;
-  newMembers: number;
-  /** Renewals due soon. */
-  renewals: number;
-  /** NGN. */
-  expectedRecurringRevenue: number;
-};
 
 export type AdminOverviewInventory = {
   lowStock: number;
@@ -79,8 +62,6 @@ export type AdminOverviewInventory = {
 };
 
 export type AdminOverviewModules = {
-  freezerPlanner: AdminOverviewFreezerPlanner;
-  membership: AdminOverviewMembership;
   inventory: AdminOverviewInventory;
 };
 
@@ -108,8 +89,8 @@ export type AdminOverviewStatusCount = {
 /* Needs your attention                                                */
 /* ------------------------------------------------------------------ */
 
-/** What the row is: the "Membership" / "Order" / "Freezer Planner" column. */
-export type AdminAttentionKind = "SHOP" | "FREEZER_PLANNER" | "MEMBERSHIP";
+/** What the row is: the "Order" column. */
+export type AdminAttentionKind = "SHOP";
 
 /** Why it is on the list: the coloured pill on the right. */
 export type AdminAttentionStatus = "PAYMENT_ISSUE" | "PROCESSING" | "PENDING";

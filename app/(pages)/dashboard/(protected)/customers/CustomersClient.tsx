@@ -73,14 +73,13 @@ export default function CustomersClient() {
   function handleExport() {
     if (!list || list.items.length === 0) return;
 
-    const header = ["Name", "Email", "Phone", "Orders", "Total Spent (NGN)", "Membership", "Last Order", "Status"];
+    const header = ["Name", "Email", "Phone", "Orders", "Total Spent (NGN)", "Last Order", "Status"];
     const rows = list.items.map((c) => [
       c.fullName,
       c.email,
       c.phone,
       c.ordersCount,
       c.totalSpent,
-      c.membership ?? "",
       c.lastOrderAt ? formatDate(c.lastOrderAt) : "",
       CUSTOMER_STATUS_LABELS[c.status],
     ]);
@@ -100,7 +99,7 @@ export default function CustomersClient() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Customers"
-        description="Manage customer accounts, orders, memberships and shopping activity."
+        description="Manage customer accounts, orders and shopping activity."
         actions={<PeriodSelect value={period} onChange={resetPage(setPeriod)} />}
       />
 

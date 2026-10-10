@@ -2,7 +2,7 @@ import type { AdminOrderPeriod, AdminOrderStat } from "./adminOrders";
 
 /**
  * Admin Customers: the staff-side customer list (stats + table) and the
- * single-customer page (summary cards, order history, membership, personal
+ * single-customer page (summary cards, order history, personal
  * info, activity, Suspend / Reactivate).
  *
  * The order history on the detail page reuses AdminOrderSummary and
@@ -42,8 +42,6 @@ export type AdminCustomerSummary = {
   ordersCount: number;
   /** NGN. */
   totalSpent: number;
-  /** Plan name for the Membership column ("Gold", "Family"), null shows "—". */
-  membership: string | null;
   /** ISO, null if the customer has never ordered. */
   lastOrderAt: string | null;
   status: AdminCustomerStatus;
@@ -87,35 +85,12 @@ export type AdminCustomerAddress = {
   isDefault: boolean;
 };
 
-export type AdminMembershipStatus = "active" | "paused" | "cancelled" | "expired";
-
-/** The Membership card on the customer page. */
-export type AdminCustomerMembership = {
-  id: string;
-  /** "Gold Membership" */
-  planName: string;
-  /** NGN per billing interval, shown as "₦50,000 / month". */
-  amount: number;
-  interval: "week" | "month" | "year";
-  status: AdminMembershipStatus;
-  /** ISO. */
-  startedAt: string;
-  /** ISO, null when it won't renew (cancelled / expired). */
-  nextBillingAt: string | null;
-  /** ISO, null when nothing is scheduled. */
-  nextDeliveryAt: string | null;
-  /** "Weekly", "Fortnightly", "Monthly" as the backend words it. */
-  deliveryFrequency: string;
-};
-
 export type AdminCustomerActivityType =
   | "order_placed"
   | "order_delivered"
   | "order_cancelled"
   | "points_redeemed"
   | "points_earned"
-  | "membership_subscribed"
-  | "membership_cancelled"
   | "address_added"
   | "other";
 
@@ -142,8 +117,6 @@ export type AdminCustomerDetail = {
   /** ISO. The "Customer Since" card. */
   customerSince: string;
   addresses: AdminCustomerAddress[];
-  /** null when the customer has no membership (the Membership section is hidden). */
-  membership: AdminCustomerMembership | null;
   /** Newest first. */
   activity: AdminCustomerActivity[];
 };

@@ -3,10 +3,8 @@
  * the proteins and delivery options offered at checkout, subscribing, and
  * managing your own subscription.
  *
- * Everything here is served from the same data staff manage on the admin
- * Membership page (redux/types/adminMembership.ts), so a plan or protein
- * edited there shows up here on the next fetch. Only active plans and
- * proteins are returned. Prices are never sent by the client: the backend
+ * Everything here is served by the backend's membership catalogue. Only
+ * active plans and proteins are returned. Prices are never sent by the client: the backend
  * always prices a subscription from its own plan.
  */
 

@@ -141,16 +141,6 @@ export default function AdminSidebar({
           ))}
         </ul>
 
-        <div className="mt-8">
-          <SectionLabel>Features</SectionLabel>
-          <ul className="space-y-1">
-            {adminNav.features.map((item) => (
-              <li key={item.href}>
-                <NavLink item={item} active={false} onNavigate={onClose} />
-              </li>
-            ))}
-          </ul>
-        </div>
       </nav>
 
       <div className="shrink-0 space-y-1 px-8 pb-8 pt-2 lg:group-data-[collapsed=true]/side:px-4">

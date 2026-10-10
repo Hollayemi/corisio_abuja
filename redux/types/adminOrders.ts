@@ -8,8 +8,8 @@
  * component reads through these types.
  */
 
-/** The three tabs on the page. */
-export type AdminOrderType = "SHOP" | "FREEZER_PLANNER";
+/** Every order is a shop order. */
+export type AdminOrderType = "SHOP";
 
 /**
  * pending          -> just placed, awaiting confirmation
@@ -121,7 +121,6 @@ export type AdminOrderSummary = {
 export type ListAdminOrdersParams = {
   /** Matches order number ("LX-10482") and customer name. */
   search?: string;
-  type?: AdminOrderType;
   status?: AdminOrderStatus;
   paymentStatus?: AdminOrderPaymentStatus;
   period?: AdminOrderPeriod;
@@ -146,8 +145,6 @@ export type AdminOrderStat = {
 
 export type GetAdminOrderStatsParams = {
   period?: AdminOrderPeriod;
-  /** Omit for all order types. */
-  type?: AdminOrderType;
 };
 
 export type AdminOrderStats = {
@@ -156,11 +153,6 @@ export type AdminOrderStats = {
   processing: AdminOrderStat;
   outForDelivery: AdminOrderStat;
   completed: AdminOrderStat;
-  /**
-   * The small counts on the tabs ("Shop Orders 5"). Always for all three
-   * types, whatever `type` was asked for. Typically orders needing attention.
-   */
-  tabCounts: Record<AdminOrderType, number>;
 };
 
 /* ------------------------------------------------------------------ */

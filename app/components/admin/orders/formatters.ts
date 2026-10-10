@@ -4,7 +4,6 @@ import type {
   AdminOrderStat,
   AdminOrderStatus,
   AdminOrderStatusGroup,
-  AdminOrderType,
 } from "@/redux/types";
 
 /* ------------------------------------------------------------------ */
@@ -40,11 +39,6 @@ export function getStatusGroup(
   if (status === "CANCELLED") return "CANCELLED";
   return "IN_PROGRESS";
 }
-
-export const ORDER_TABS: { value: AdminOrderType; label: string }[] = [
-  { value: "SHOP", label: "Shop Orders" },
-  { value: "FREEZER_PLANNER", label: "Freezer Planner Orders" },
-];
 
 export const PERIOD_OPTIONS: { value: AdminOrderPeriod; label: string }[] = [
   { value: "today", label: "Today" },

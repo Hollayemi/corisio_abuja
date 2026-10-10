@@ -5,8 +5,7 @@ import type { Paginated } from "./inventory";
  * Admin Delivery & Schedule: the month calendar, the deliveries of the
  * selected day, and updating a delivery's status.
  *
- * Deliveries are created by the backend from the things customers set up
- * (membership subscriptions and Freezer Planner orders), so the
+ * Deliveries are created by the backend from customers' orders, so the
  * calendar always matches what customers see. Adjust field names to match
  * the NestJS DTOs.
  *
@@ -15,8 +14,8 @@ import type { Paginated } from "./inventory";
  * because of UTC.
  */
 
-/** The colours on the calendar: green, orange, purple. */
-export type AdminDeliveryType = "freezer_planner" | "membership";
+/** Every delivery is for a customer order. */
+export type AdminDeliveryType = "shop";
 
 /**
  * scheduled        -> upcoming

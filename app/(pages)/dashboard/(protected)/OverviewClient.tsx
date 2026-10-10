@@ -3,7 +3,7 @@
 import { MotionConfig, motion } from "framer-motion";
 import AdminPageHeader from "@/app/components/admin/AdminPageHeader";
 import AttentionList from "@/app/components/admin/overview/AttentionList";
-import ModuleCards from "@/app/components/admin/overview/ModuleCards";
+import InventoryCard from "@/app/components/admin/overview/InventoryCard";
 import { rise, stagger } from "@/app/components/admin/overview/motion";
 import OrderActivityCard from "@/app/components/admin/overview/OrderActivityCard";
 import OrderStatusChart from "@/app/components/admin/overview/OrderStatusChart";
@@ -77,7 +77,7 @@ function Dashboard({ overview }: { overview: AdminOverview }) {
         <OrderStatusChart items={overview.ordersByStatus ?? []} />
       </motion.div>
 
-      <ModuleCards modules={overview.modules} />
+      <InventoryCard inventory={overview.modules.inventory} />
 
       <motion.div
         variants={rise}

@@ -31,7 +31,7 @@ function Stat({
           <span
             aria-hidden="true"
             className={`flex size-4 items-center justify-center rounded-full text-[10px] ${
-              change.trend === "down" ? "bg-red-100 text-red-600" : "bg-corisio-100merald-100 text-emerald-600"
+              change.trend === "down" ? "bg-red-100 text-red-600" : "bg-emerald-100 text-emerald-600"
             }`}
           >
             {change.trend === "down" ? "↓" : "↑"}
@@ -52,7 +52,6 @@ export default function OverviewStats({ stats }: { stats: AdminOverviewStats }) 
       <Stat stat={stats.completedOrders} label="Completed Orders" format={formatCount} />
       <Stat stat={stats.totalSales} label="Total Sales" format={formatNaira} />
       <Stat stat={stats.activeCustomers} label="Active Customers" format={formatCount} />
-      <Stat stat={stats.activeMemberships} label="Active Memberships" format={formatCount} />
     </div>
   );
 }
