@@ -28,7 +28,6 @@ export const adminNav = {
     { label: "Membership", href: "/dashboard/membership", icon: "membership" },
   ],
   features: [
-    { label: "Meat Box", href: "/meat-box", icon: "meatBox", external: true },
     {
       label: "Freezer Planner",
       href: "/freezer-planner",

@@ -7,27 +7,23 @@ import type { AdminAttentionItem, AdminAttentionKind, AdminAttentionStatus } fro
 
 const KIND_LABELS: Record<AdminAttentionKind, string> = {
   SHOP: "Order",
-  MEAT_BOX: "Meat Box",
   FREEZER_PLANNER: "Freezer Planner",
   MEMBERSHIP: "Membership",
 };
 
 const KIND_HREFS: Record<AdminAttentionKind, string> = {
   SHOP: "/dashboard/orders",
-  MEAT_BOX: "/dashboard/orders",
   FREEZER_PLANNER: "/dashboard/orders",
   MEMBERSHIP: "/dashboard/membership",
 };
 
 const STATUS_LABELS: Record<AdminAttentionStatus, string> = {
-  AWAITING_WEIGHT: "Awaiting weight",
   PAYMENT_ISSUE: "Payment issue",
   PROCESSING: "Processing",
   PENDING: "Pending",
 };
 
 const STATUS_STYLES: Record<AdminAttentionStatus, string> = {
-  AWAITING_WEIGHT: "bg-neutral-100 text-neutral-800",
   PAYMENT_ISSUE: "bg-[#fbe9e9] text-red-600",
   PROCESSING: "bg-[#fdf0da] text-corisio-yellow",
   PENDING: "bg-neutral-100 text-neutral-600",

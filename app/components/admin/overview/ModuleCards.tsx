@@ -11,7 +11,6 @@ import { rise, stagger } from "./motion";
 
 /* Full class names per card so Tailwind can see them */
 const TONES = {
-  red: { tile: "bg-[#fbe4e4] text-[#c0392b]", footer: "bg-[#fdf0f0]", icon: "text-[#c0392b]" },
   teal: { tile: "bg-[#d9f1ec] text-[#1f9e89]", footer: "bg-[#e6f6f2]", icon: "text-[#1f9e89]" },
   purple: { tile: "bg-[#e6e0fa] text-[#6c4fd6]", footer: "bg-[#efeafc]", icon: "text-[#6c4fd6]" },
   orange: { tile: "bg-[#fdebd0] text-[#e0861a]", footer: "bg-[#fdf3e3]", icon: "text-[#e0861a]" },
@@ -125,25 +124,10 @@ function ModuleCard({
 }
 
 export default function ModuleCards({ modules }: { modules: AdminOverviewModules }) {
-  const { meatBox, freezerPlanner, membership, inventory } = modules;
+  const { freezerPlanner, membership, inventory } = modules;
 
   return (
-    <motion.div variants={stagger} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <ModuleCard
-        tone="red"
-        icon="meatBox"
-        title="Meat Box"
-        subtitle="Bulk meat orders with custom preparations"
-        metrics={[
-          { value: meatBox.activeOrders, label: "Active Orders" },
-          { value: meatBox.preparing, label: "Preparing" },
-          { value: meatBox.awaitingWeight, label: "Awaiting weight" },
-        ]}
-        footerIcon={<AdminIcon name="package" className="size-6" />}
-        caption="Next delivery window"
-        headline={meatBox.nextDeliveryWindow ?? "Nothing scheduled"}
-        href="/dashboard/orders"
-      />
+    <motion.div variants={stagger} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       <ModuleCard
         tone="teal"
         icon="freezerPlanner"

@@ -5,14 +5,12 @@ import type {
 } from "@/redux/types/adminDeliveries";
 
 export const DELIVERY_TYPE_LABELS: Record<AdminDeliveryType, string> = {
-  meat_box: "Meat Box Delivery",
   freezer_planner: "Freezer Planner Delivery",
   membership: "Membership Order Delivery",
 };
 
-/** The short word on a calendar chip ("Meat..", "Free..", "Mem.."). */
+/** The short word on a calendar chip ("Free..", "Mem.."). */
 export const DELIVERY_TYPE_SHORT: Record<AdminDeliveryType, string> = {
-  meat_box: "Meat Box",
   freezer_planner: "Freezer Planner",
   membership: "Membership",
 };
@@ -45,10 +43,6 @@ export const DELIVERY_TYPE_STYLES: Record<
   AdminDeliveryType,
   { chip: string; card: string }
 > = {
-  meat_box: {
-    chip: "bg-[#e3f5dd] text-[#1c5a12]",
-    card: "border-[#bfe5b3] bg-[#f0fbea]",
-  },
   freezer_planner: {
     chip: "bg-[#fdf0dc] text-[#e08a12]",
     card: "border-[#f5dcb8] bg-[#fff6ec]",

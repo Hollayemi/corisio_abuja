@@ -6,8 +6,10 @@ import AttentionList from "@/app/components/admin/overview/AttentionList";
 import ModuleCards from "@/app/components/admin/overview/ModuleCards";
 import { rise, stagger } from "@/app/components/admin/overview/motion";
 import OrderActivityCard from "@/app/components/admin/overview/OrderActivityCard";
+import OrderStatusChart from "@/app/components/admin/overview/OrderStatusChart";
 import OverviewSkeleton from "@/app/components/admin/overview/OverviewSkeleton";
 import OverviewStats from "@/app/components/admin/overview/OverviewStats";
+import SalesTrendChart from "@/app/components/admin/overview/SalesTrendChart";
 import TopProducts from "@/app/components/admin/overview/TopProducts";
 import { getErrorMessage } from "@/redux/config/errors";
 import { useGetAdminOverviewQuery } from "@/redux/slices/adminOverviewApi";
@@ -26,7 +28,7 @@ export default function OverviewClient() {
       <div className="space-y-6">
         <AdminPageHeader
           title="Business Overview"
-          description="Here's a quick look at how Luxol is performing today."
+          description="Here's a quick look at how your store is performing today."
         />
 
         {overview ? (
@@ -66,6 +68,14 @@ function Dashboard({ overview }: { overview: AdminOverview }) {
         <OrderActivityCard week={overview.week} />
         <OverviewStats stats={overview.stats} />
       </motion.section>
+
+      <motion.div
+        variants={rise}
+        className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]"
+      >
+        <SalesTrendChart points={overview.salesTrend ?? []} />
+        <OrderStatusChart items={overview.ordersByStatus ?? []} />
+      </motion.div>
 
       <ModuleCards modules={overview.modules} />
 

@@ -25,7 +25,6 @@ export const MEMBERSHIP_STATUS_LABELS: Record<AdminMembershipStatus, string> = {
 /** The Type column in the customer's Order History. */
 export const ORDER_TYPE_LABELS: Record<AdminOrderType, string> = {
   SHOP: "SHOP",
-  MEAT_BOX: "Meat Box",
   FREEZER_PLANNER: "Freezer Planner",
 };
 

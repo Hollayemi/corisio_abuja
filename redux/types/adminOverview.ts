@@ -1,10 +1,15 @@
-import type { AdminOrderCustomerBrief, AdminOrderPeriod, AdminOrderStat } from "./adminOrders";
+import type {
+  AdminOrderCustomerBrief,
+  AdminOrderPeriod,
+  AdminOrderStat,
+  AdminOrderStatus,
+} from "./adminOrders";
 
 /**
  * Admin Overview ("Business Overview"): the landing page of the admin area.
  * Two requests feed it:
  *
- *   GET /admin/overview                 -> AdminOverview     (everything except Top Selling)
+ *   GET /admin/overview                 -> AdminOverview     (everything except Top Selling, incl. the two charts)
  *   GET /admin/overview/top-products    -> AdminTopProducts  (follows the "This Month" select)
  *
  * Adjust field names here to match the NestJS DTOs.
@@ -46,16 +51,8 @@ export type AdminOverviewStats = {
 };
 
 /* ------------------------------------------------------------------ */
-/* The four service cards                                              */
+/* The service cards                                                   */
 /* ------------------------------------------------------------------ */
-
-export type AdminOverviewMeatBox = {
-  activeOrders: number;
-  preparing: number;
-  awaitingWeight: number;
-  /** Ready to show, e.g. "Today: 10:00 AM - 2:00PM". Null when nothing is scheduled. */
-  nextDeliveryWindow: string | null;
-};
 
 export type AdminOverviewFreezerPlanner = {
   activeOrders: number;
@@ -82,28 +79,47 @@ export type AdminOverviewInventory = {
 };
 
 export type AdminOverviewModules = {
-  meatBox: AdminOverviewMeatBox;
   freezerPlanner: AdminOverviewFreezerPlanner;
   membership: AdminOverviewMembership;
   inventory: AdminOverviewInventory;
 };
 
 /* ------------------------------------------------------------------ */
+/* Charts                                                              */
+/* ------------------------------------------------------------------ */
+
+/** One day on the sales chart. */
+export type AdminOverviewSalesPoint = {
+  /** Calendar day, "2026-10-09". */
+  date: string;
+  /** NGN taken that day from paid orders. */
+  sales: number;
+  /** Orders placed that day. */
+  orders: number;
+};
+
+/** One row of the "Orders by status" chart. */
+export type AdminOverviewStatusCount = {
+  status: AdminOrderStatus;
+  count: number;
+};
+
+/* ------------------------------------------------------------------ */
 /* Needs your attention                                                */
 /* ------------------------------------------------------------------ */
 
-/** What the row is: the "Meat Box" / "Membership" / "Order" / "Freezer Planner" column. */
-export type AdminAttentionKind = "SHOP" | "MEAT_BOX" | "FREEZER_PLANNER" | "MEMBERSHIP";
+/** What the row is: the "Membership" / "Order" / "Freezer Planner" column. */
+export type AdminAttentionKind = "SHOP" | "FREEZER_PLANNER" | "MEMBERSHIP";
 
 /** Why it is on the list: the coloured pill on the right. */
-export type AdminAttentionStatus = "AWAITING_WEIGHT" | "PAYMENT_ISSUE" | "PROCESSING" | "PENDING";
+export type AdminAttentionStatus = "PAYMENT_ISSUE" | "PROCESSING" | "PENDING";
 
 export type AdminAttentionItem = {
   id: string;
   reference: string;
   customer: AdminOrderCustomerBrief & { email: string };
   kind: AdminAttentionKind;
-  /** NGN. Null while it can't be known yet (a Meat Box still awaiting its weight). */
+  /** NGN. Null while the amount can't be known yet. */
   amount: number | null;
   status: AdminAttentionStatus;
   createdAt: string;
@@ -117,6 +133,10 @@ export type AdminOverview = {
   week: AdminOverviewWeek;
   stats: AdminOverviewStats;
   modules: AdminOverviewModules;
+  /** Daily sales for the last 30 days, oldest first. The page shows 7 or 30 of them. */
+  salesTrend?: AdminOverviewSalesPoint[];
+  /** Order counts per status for the current month, in any order. */
+  ordersByStatus?: AdminOverviewStatusCount[];
   /** The most urgent few, newest first. The page shows what it is given. */
   attention: AdminAttentionItem[];
 };

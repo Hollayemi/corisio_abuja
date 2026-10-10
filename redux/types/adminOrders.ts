@@ -9,7 +9,7 @@
  */
 
 /** The three tabs on the page. */
-export type AdminOrderType = "SHOP" | "MEAT_BOX" | "FREEZER_PLANNER";
+export type AdminOrderType = "SHOP" | "FREEZER_PLANNER";
 
 /**
  * pending          -> just placed, awaiting confirmation

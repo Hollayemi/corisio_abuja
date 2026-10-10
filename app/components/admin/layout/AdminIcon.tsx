@@ -15,7 +15,6 @@ const FILE_ICONS = {
   logout: `${V}/logout.svg`,
   external: `${V}/export.svg`,
   search: `${V}/search-normal.svg`,
-  meatBox: `${H}/shipping and delivery/outline/package box 07.svg`,
   freezerPlanner: `${V}/shop.svg`,
   bell: `${H}/interface/outline/notification 03.svg`,
   export: `${V}/export.svg`,

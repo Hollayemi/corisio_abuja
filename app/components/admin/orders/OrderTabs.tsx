@@ -10,7 +10,7 @@ export type OrderTabsProps = {
   counts?: Record<AdminOrderType, number>;
 };
 
-/** Shop Orders / Meat Box Orders / Freezer Planner Orders. */
+/** Shop Orders / Freezer Planner Orders. */
 export function OrderTabs({ value, onChange, counts }: OrderTabsProps) {
   return (
     <div role="tablist" aria-label="Order type" className="flex flex-wrap items-center gap-1">
