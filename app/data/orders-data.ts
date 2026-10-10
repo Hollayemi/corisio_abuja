@@ -55,10 +55,11 @@ export type OrderRating = {
 };
 
 export type Order = {
-  /** Without the "LX-" prefix, e.g. "10482". */
+  /** Without the "ORD-" prefix, e.g. "10482". */
   id: string;
   placedAt: string; // ISO 8601
   status: OrderStatus;
+  orderNumber: string;
   deliveryType: DeliveryType;
   receiverPhone: string;
   deliveryAddress: string;
@@ -99,10 +100,9 @@ export function isRatable(order: Order): boolean {
   return order.status === "completed";
 }
 
-const ORDER_ID_PREFIX = "LX-";
 
 export function formatOrderId(order: Pick<Order, "id">): string {
-  return `#${ORDER_ID_PREFIX}${order.id}`;
+  return `#${order.orderNumber}`;
 }
 
 // "en-US" gives the "Sep 12, 2026" / "2:15PM" ordering used in the design,

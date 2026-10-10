@@ -103,7 +103,6 @@ export type AdminOrderTimelineEvent = {
 /** A row in the Orders table. */
 export type AdminOrderSummary = {
   id: string;
-  /** Human order number shown in the table: "#LX-10482". */
   orderNumber: string;
   type: AdminOrderType;
   status: AdminOrderStatus;

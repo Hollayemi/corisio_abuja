@@ -66,6 +66,7 @@ export type OrderDetail = {
   status: OrderStatus;
   deliveryType: DeliveryType;
   receiverPhone: string;
+  orderNumber: string;
   deliveryAddress: string;
   email: string;
   items: OrderItem[];

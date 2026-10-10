@@ -123,7 +123,6 @@ export type AdminCustomerActivityType =
 export type AdminCustomerActivity = {
   id: string;
   type: AdminCustomerActivityType;
-  /** Ready to show: "Placed order #LX-10481 — ₦32,400". */
   title: string;
   /** ISO. */
   occurredAt: string;

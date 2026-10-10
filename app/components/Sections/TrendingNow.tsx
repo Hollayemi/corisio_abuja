@@ -12,7 +12,7 @@ export default function TrendingNow() {
   return (
     <ProductSection
       id="trending-now"
-      title="📈 Trending Now"
+      title="Trending Now"
       viewAllHref="/shop?sort=trending"
       viewAllLabel="View all trending →"
       products={data?.data.items ?? []}

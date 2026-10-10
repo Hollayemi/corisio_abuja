@@ -30,9 +30,8 @@ function StoreCard({ store }: { store: PublicStore }) {
         />
         {open !== null && (
           <span
-            className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white ${
-              open ? "bg-green-600" : "bg-neutral-700"
-            }`}
+            className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white ${open ? "bg-green-600" : "bg-neutral-700"
+              }`}
           >
             {open ? "Open now" : "Closed"}
           </span>
@@ -81,10 +80,17 @@ export default function StoresNearYou() {
         viewport={viewportOnce}
         className="flex items-baseline justify-between gap-4"
       >
-        <h2 id="stores-near-you-heading" className="text-xl font-bold text-neutral-900 sm:text-2xl">
-          🏪 Stores Near You
-        </h2>
-        <Link href="/stores" className="text-xs font-medium text-corisio-blue hover:underline sm:text-sm">
+        <div className="relative">
+          <h2
+            id="categories-heading"
+            className="text-sm mt-6 font-semibold tracking-tight text-corisio-blue sm:text-xl"
+          >
+            Stores Near You
+          </h2>
+          <div className="absolute h-0.5 w-2/5 mx-auto ml-4 bg-corisio-yellow"></div>
+        </div>
+
+        <Link href="/nearby" className="text-xs font-medium text-corisio-blue hover:underline sm:text-sm">
           Open the map →
         </Link>
       </motion.div>

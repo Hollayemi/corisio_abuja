@@ -12,7 +12,7 @@ export default function NewOnCorisio() {
   return (
     <ProductSection
       id="new-on-corisio"
-      title="🆕 New on Corisio"
+      title="New on Corisio"
       viewAllHref="/shop?sort=newest"
       viewAllLabel="See what's new →"
       products={data?.data.items ?? []}

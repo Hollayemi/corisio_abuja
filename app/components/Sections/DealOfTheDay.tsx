@@ -12,7 +12,7 @@ export default function DealOfTheDay() {
   return (
     <ProductSection
       id="deal-of-the-day"
-      title="🔥 Deals of the Day"
+      title="Deals of the Day"
       viewAllHref="/offers"
       viewAllLabel="View all deals →"
       products={data?.data.items ?? []}

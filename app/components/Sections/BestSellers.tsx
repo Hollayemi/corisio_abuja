@@ -12,7 +12,7 @@ export default function BestSellers() {
   return (
     <ProductSection
       id="best-sellers"
-      title="🛒 Best Sellers"
+      title="Best Sellers"
       viewAllHref="/shop?sort=best-selling"
       viewAllLabel="View all best sellers →"
       products={data?.data.items ?? []}

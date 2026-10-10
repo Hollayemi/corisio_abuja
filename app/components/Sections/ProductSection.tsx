@@ -46,12 +46,21 @@ export default function ProductSection({
         viewport={viewportOnce}
         className="flex items-baseline justify-between gap-4"
       >
-        <h2
+        {/* <h2
           id={`${id}-heading`}
           className="text-xl font-bold text-neutral-900 sm:text-2xl"
         >
           {title}
-        </h2>
+        </h2> */}
+        <div className="relative">
+          <h2
+            id="categories-heading"
+            className="text-sm mt-6 font-semibold tracking-tight text-corisio-blue sm:text-xl"
+          >
+            {title}
+          </h2>
+          <div className="absolute h-0.5 ml-6 w-2/5 bg-corisio-yellow"></div>
+        </div>
         <Link
           href={viewAllHref}
           className="text-xs font-medium text-corisio-blue hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-corisio-blue sm:text-sm"
@@ -71,7 +80,7 @@ export default function ProductSection({
           ))}
         </div>
       ) : products.length === 0 ? (
-        <p className="mt-6 text-sm text-neutral-500">{emptyMessage}</p>
+        <p className="mt-6 text-xs text-center my-10 text-neutral-500">{emptyMessage}</p>
       ) : (
         <motion.div
           variants={stagger(0.06)}

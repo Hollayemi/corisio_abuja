@@ -130,9 +130,9 @@ export default function Hero() {
             </motion.div>
           </AnimatePresence>
 
-          <motion.div variants={variants}>
+          {/* <motion.div variants={variants}>
             <HeroSearch />
-          </motion.div>
+          </motion.div> */}
 
           <motion.div variants={variants} className="mt-6 flex flex-wrap gap-3">
             <Link

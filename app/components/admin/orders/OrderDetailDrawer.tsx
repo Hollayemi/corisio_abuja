@@ -34,7 +34,6 @@ export function useOpenOrderDetail() {
 type FooterMode = "actions" | "update" | "cancel";
 
 export type OrderDetailDrawerProps = {
-  /** The order's id (not the "#LX-" number). */
   orderId: string;
   close: () => void;
 };

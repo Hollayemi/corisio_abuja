@@ -100,7 +100,6 @@ export type AdminAttentionStatus = "AWAITING_WEIGHT" | "PAYMENT_ISSUE" | "PROCES
 
 export type AdminAttentionItem = {
   id: string;
-  /** "#LX-10482" */
   reference: string;
   customer: AdminOrderCustomerBrief & { email: string };
   kind: AdminAttentionKind;

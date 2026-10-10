@@ -201,7 +201,7 @@ function StoreDetailsForm({ profile, canEdit }: { profile: StoreProfile; canEdit
     if (!isValidPhone(draft.phone)) e.phone = "Enter a valid phone number.";
     if (draft.whatsapp.trim() && !isValidPhone(draft.whatsapp)) e.whatsapp = "Enter a valid WhatsApp number.";
     if (!ORDER_PREFIX_PATTERN.test(draft.orderPrefix.trim()))
-      e.orderPrefix = "Use 2 to 6 capital letters or numbers, e.g. LX.";
+      e.orderPrefix = "Use 2 to 6 capital letters or numbers, e.g. ORD.";
     if (draft.tagline.length > 80) e.tagline = "Keep it under 80 characters.";
     for (const k of LINK_KEYS) if (normalizeUrl(draft[k]) === null) e[k] = "Enter a valid link, e.g. https://example.com";
     return e;
@@ -354,7 +354,7 @@ function StoreDetailsForm({ profile, canEdit }: { profile: StoreProfile; canEdit
               label="Order prefix"
               htmlFor={ids.prefix}
               error={errors.orderPrefix}
-              hint="Starts your order numbers, e.g. LX-1042. Only new orders use a changed prefix."
+              hint="Starts your order numbers, e.g. ORD-1042. Only new orders use a changed prefix."
             >
               <input
                 id={ids.prefix}

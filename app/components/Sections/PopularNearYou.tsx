@@ -23,7 +23,7 @@ export default function PopularNearYou() {
         className="mx-auto w-full max-w-[1240px] px-4 pb-12 sm:px-6 sm:pb-14"
       >
         <h2 id="popular-near-you-heading" className="text-xl font-bold text-neutral-900 sm:text-2xl">
-          📍 Popular Near You
+          Popular Near You
         </h2>
         <div className="mt-6 flex flex-col items-start gap-3 rounded-2xl bg-[#f5f8ef] p-6">
           <p className="text-sm text-neutral-700">
@@ -50,7 +50,7 @@ export default function PopularNearYou() {
   return (
     <ProductSection
       id="popular-near-you"
-      title="📍 Popular Near You"
+      title="Popular Near You"
       viewAllHref="/shop?sort=nearest"
       viewAllLabel="View all nearby →"
       products={data?.data.items ?? []}

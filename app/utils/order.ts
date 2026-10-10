@@ -9,10 +9,9 @@ export function tabForStatus(status: OrderStatus): OrdersTab {
   return status === "cancelled" || status === "returned" ? "cancelled" : "orders";
 }
 
-const ORDER_ID_PREFIX = "LX-";
 
-export function formatOrderId(order: { id: string }): string {
-  return `#${ORDER_ID_PREFIX}${order.id}`;
+export function formatOrderId(order: { orderNumber: string }): string {
+  return `#${order.orderNumber}`;
 }
 
 // "en-US" gives the "Sep 12, 2026" / "2:15PM" ordering used in the design,
